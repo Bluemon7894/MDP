@@ -19,3 +19,6 @@ logs/
 # beside it.
 /.plugins/
 /.opencode-skills/
+
+# 아케이드 랭킹 저장 파일 (vite.config.ts arcadeServer)
+/data/
