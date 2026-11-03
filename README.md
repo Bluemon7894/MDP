@@ -51,8 +51,35 @@
 
 ## 🚀 시작하기 (Getting Started)
 
-### 1. 저장소 클론 및 패키지 설치
+### 1. 준비물
+- [Node.js](https://nodejs.org) 22 이상
+- 인터넷 연결 (AI 인식에 Google 서버를 씁니다)
+
+### 2. 받기 및 설치 (처음 한 번)
 ```bash
-git clone [https://github.com/Bluemon7894/MDP.git](https://github.com/Bluemon7894/MDP.git)
-cd MDP/niga
-npm install
+git clone https://github.com/Bluemon7894/MDP.git
+cd MDP
+npm install -g pnpm
+pnpm install
+```
+> AI 그림 파일은 Git LFS로 올라가 있습니다. 그림이 깨져 보이면 `git lfs install` 후 `git lfs pull`을 실행하세요.
+
+### 3. 서버 실행 (게임할 때마다)
+```bash
+pnpm dev -- --port 5199
+```
+`Local: http://localhost:5199` 이 뜨면 준비 완료입니다. 이 창은 게임하는 동안 켜 두세요. (끄면 랭킹 저장과 두 화면 연결이 멈춥니다)
+
+### 4. 화면 열기
+| 화면 | 주소 |
+|---|---|
+| 1P 화면 (홈·게임) | http://localhost:5199/?screen=a |
+| 2P · 랭킹 화면 | http://localhost:5199/?screen=b |
+
+- **한 컴퓨터 + 모니터 2대**: `start-arcade.bat` 실행 → 두 화면이 각 모니터에 전체 화면으로 뜹니다. 모니터 배치가 다르면 파일 안의 `MONITOR2_POS` 를 고치세요.
+- **노트북 2대 (같은 와이파이)**: 서버를 켠 노트북에서 `start-arcade.bat a`, 다른 노트북에서 `start-arcade.bat b 서버노트북IP` (IP는 서버 창의 `Network:` 주소)
+  - 다른 노트북에서 안 열리면 Windows 와이파이를 "개인 네트워크"로 바꾸거나 방화벽에서 Node.js를 허용하세요. 학교 와이파이는 기기끼리 통신을 막을 수 있으니 휴대폰 핫스팟·공유기를 쓰면 확실합니다.
+
+### 5. 기록
+- 랭킹·전체 기록·홈 그림은 서버 노트북의 `data/` 폴더에 저장됩니다 (깃허브에는 올라가지 않음).
+- 랭킹 화면의 **전체 기록 관리**에서 이름 수정·삭제·초기화를 할 수 있습니다.
