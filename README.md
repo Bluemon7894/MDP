@@ -66,7 +66,7 @@ pnpm install
 
 ### 3. 서버 실행 (게임할 때마다)
 ```bash
-pnpm dev -- --port 5199
+npx vite --port 5199
 ```
 `Local: http://localhost:5199` 이 뜨면 준비 완료입니다. 이 창은 게임하는 동안 켜 두세요. (끄면 랭킹 저장과 두 화면 연결이 멈춥니다)
 
