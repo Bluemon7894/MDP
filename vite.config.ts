@@ -5,9 +5,9 @@ import path from 'node:path'
 import fs from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
-import siteConfiguration from './.figma/make/site.json'
-import { dedupeRankings, generateUniqueId, sanitizeRecords } from './src/utils/rankingCore'
-import type { RankItem } from './src/types'
+import siteConfiguration from './.figma/make/site.json' with { type: 'json' }
+import { dedupeRankings, generateUniqueId, sanitizeRecords } from './src/utils/rankingCore.ts'
+import type { RankItem } from './src/types.ts'
 
 
 // Vite config — https://vitejs.dev/config/
@@ -28,11 +28,11 @@ react(),
       figmaErrorOverlayReplay(),
       figmaReactRefreshBoundaryFallback(),
       figmaMakeKitPlugin({ storiesGlob: '/src/**/*.stories.{ts,tsx,js,jsx}' }),
-      arcadeServer(path.resolve(__dirname, 'data')),
+      arcadeServer(path.resolve((import.meta.dirname ?? path.resolve('.')), 'data')),
     ],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, './src'),
+        '@': path.resolve((import.meta.dirname ?? path.resolve('.')), './src'),
       },
     },
     server: {

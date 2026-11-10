@@ -60,7 +60,7 @@ export function ModeModal({
             <ul className="mt-5 flex flex-col gap-2.5 text-graphite leading-relaxed">
               <li>AI는 실제 사진을 옮긴 듯한 연필 소묘를 8~13초 만에 그립니다.</li>
               <li>사람과 같은 기준으로 채점되며, 보통 한 라운드에 800점 넘게 받습니다.</li>
-              <li>이기려면 AI가 1순위로 알아볼 형태, 꽉 찬 명암, 빠른 완성을 모두 해내야 합니다.</li>
+              <li>이기려면 AI가 1순위로 알아볼 형태, 최적의 스트로크 획수, 빠른 완성을 모두 해내야 합니다.</li>
             </ul>
             <div className="flex gap-3 mt-8 justify-end">
               <Button variant="secondary" onClick={() => setWarnHard(false)}>다른 모드 고르기</Button>

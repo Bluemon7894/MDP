@@ -137,7 +137,7 @@ export function AdvancedAnalysisModal({
       value: hit ? `${hit}순위 · ${guesses[hit - 1]}` : guesses[0] ? `${guesses[0]}(으)로 봤습니다` : '알아보지 못했습니다',
       focus: spots[0],
     })
-    list.push({ label: '명암', value: item('tone')?.detail ?? '', focus: spots[1] })
+    list.push({ label: '스트로크', value: item('stroke')?.detail ?? '', focus: spots[1] })
     list.push({ label: '구도', value: '크기와 위치' })
     return list
     // eslint-disable-next-line react-hooks/exhaustive-deps

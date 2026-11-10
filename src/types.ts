@@ -1,6 +1,6 @@
 export type ScreenTarget = 'a' | 'b' | 'both'
 export type CabAState = 'idle' | 'modeSelect' | 'nickname1P' | 'waiting2P' | 'inGame' | 'practice'
-export type CabBState = 'leaderboard' | 'nickname2P' | 'inGame'
+export type CabBState = 'leaderboard' | 'nickname2P' | 'waiting1P' | 'inGame'
 export type ActivePlayer = '1P' | '2P'
 export type BtnColor = 'coral' | 'mint' | 'yellow' | 'sky' | 'purple'
 
@@ -33,7 +33,7 @@ export interface BestDrawing {
 }
 
 export interface MetricItem {
-  key: 'recognition' | 'speed' | 'tone' | 'form' | 'teamwork'
+  key: 'recognition' | 'speed' | 'stroke' | 'form' | 'teamwork'
   /** 점수를 더하지 않고 합계에 곱하는 항목 (반쪽 협동의 협동 배율) */
   multiplier?: number
   label: string

@@ -6,7 +6,6 @@ import { recognizeDrawing } from '../utils/recognize'
 import { onArcade, postArcade } from '../utils/arcadeSync'
 import { AdvancedAnalysisModal } from './Modals'
 import { ToolBar, snapshotOf, useDrawingPad } from './DrawingPad'
-import { HalfExample } from './Examples'
 import { Button, Label, Overlay, Panel, KeywordTitle } from './ui'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -145,7 +144,7 @@ export function ScreenHalf({
     const res = strokes.length ? await recognizeDrawing(strokes, currentKeyword) : null
     // 속도 점수는 둘 중 늦게 끝낸 쪽 기준
     const t = Math.min(left?.timeLeft ?? 0, right?.timeLeft ?? 0)
-    const report = evaluateCoop(c, t, res?.rank ?? 0, TURN_SEC)
+    const report = evaluateCoop(c, t, res?.rank ?? 0, TURN_SEC, strokes)
     if (roundRef.current !== thisRound) return
     postArcade('HALF_RESULT', { round: thisRound, report, image: c.toDataURL('image/jpeg', 0.82), list: res?.list ?? [], rank: res?.rank ?? 0 } satisfies ResultPayload)
   }
@@ -342,11 +341,11 @@ export function ScreenHalf({
             </div>
           </Panel>
 
-          <Panel className="p-6 flex-1 flex flex-col">
-            <Label>이렇게 그려요</Label>
-            <div className="mt-3">
-              <HalfExample myRole={role} />
-            </div>
+                    <Panel className="p-6 flex-1 flex flex-col">
+            <Label>협동 안내</Label>
+            <p className="mt-4 font-display text-xl text-ink leading-relaxed">
+              {role === '1P' ? '1P는 왼쪽' : '2P는 오른쪽'} 절반을 맡아 그립니다.
+            </p>
             <p className="mt-3 text-sm text-graphite leading-relaxed">보라색 눈금 높이에 맞춰 {partnerName}님과 크기를 맞춰 보세요. 한 사람만 그리면 협동 배율 때문에 0점입니다.</p>
             {waitingNext && <p className="mt-auto pt-4 font-display text-lg text-violet">다음 라운드를 준비하고 있습니다</p>}
           </Panel>

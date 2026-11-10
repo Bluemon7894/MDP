@@ -5,6 +5,7 @@ import { getCachedRankings, fetchRankings, submitRanking, deleteRanking } from '
 import { bestScoreIn } from './utils/rankingCore'
 import { GalleryItem, postGallery } from './utils/gallery'
 import { postArcade, onArcade, onRankingsChanged, ArcadeMessage } from './utils/arcadeSync'
+import { dispenseCandy } from './utils/candyDispenser'
 
 import { CustomAlertModal, ArcadeBackground } from './components/CommonUI'
 import { HangulKeyboard } from './components/HangulKeyboard'
@@ -56,6 +57,8 @@ export default function App() {
   })
 
   const gameFinishedRef = useRef(false)
+  const p1ReadyRef = useRef(false)
+  const p2ReadyRef = useRef(false)
   // 게임 중 플레이어별로 가장 점수가 높았던 그림 (랭킹 카드에 띄운다)
   const bestRef = useRef<Record<ActivePlayer, BestDrawing | null>>({ '1P': null, '2P': null })
 
@@ -106,16 +109,32 @@ export default function App() {
   // 화면 사이 메시지 (서버 중계라 Chrome 계정·브라우저가 달라도 이어진다)
   useEffect(() => {
     const handleMessage = ({ type, payload }: ArcadeMessage) => {
-      if (type === 'REQUEST_2P_MODE') {
+            if (type === 'REQUEST_2P_MODE' || type === 'INIT_2P_MODE') {
         setIsTwoPlayer(true)
         setIsVsAi(false)
         setIsCoop(!!payload.coop)
-        setCabA('waiting2P')
+        setCabA('nickname1P')
         setCabB('nickname2P')
         setGameKeywords(payload.keywords)
-        setP1Name(payload.p1Name)
+        p1ReadyRef.current = false
+        p2ReadyRef.current = false
         gameFinishedRef.current = false
+      } else if (type === 'P1_READY_TRIGGER') {
+        setP1Name(payload.p1Name)
+        p1ReadyRef.current = true
+        if (p2ReadyRef.current) {
+          postArcade('TRIGGER_START', { p1Name: payload.p1Name, p2Name })
+          startSimultaneousCountdown()
+        }
       } else if (type === 'P2_READY_TRIGGER') {
+        setP2Name(payload.p2Name)
+        p2ReadyRef.current = true
+        if (p1ReadyRef.current) {
+          postArcade('TRIGGER_START', { p1Name, p2Name: payload.p2Name })
+          startSimultaneousCountdown()
+        }
+      } else if (type === 'TRIGGER_START') {
+        setP1Name(payload.p1Name)
         setP2Name(payload.p2Name)
         startSimultaneousCountdown()
       } else if (type === 'START_GAME_NOW') {
@@ -131,6 +150,8 @@ export default function App() {
         resetPvp()
         pendingGalleryRef.current = []
         gameFinishedRef.current = false
+        p1ReadyRef.current = false
+        p2ReadyRef.current = false
       } else if (type === 'NEXT_TURN') {
         setActivePlayer(payload.nextPlayer)
         setRound(payload.nextRound)
@@ -159,6 +180,8 @@ export default function App() {
         setCountdown(null)
         setCustomModal({ isOpen: false, title: '', message: '', type: 'alert' })
         gameFinishedRef.current = false
+        p1ReadyRef.current = false
+        p2ReadyRef.current = false
       }
     }
 
@@ -252,6 +275,7 @@ export default function App() {
 
     if (!isTwoPlayer) {
       const r1 = saveRecord(p1Name, finalP1Score, 'solo', '1P')
+    dispenseCandy('solo_complete')
       submitRecords([r1])
       setCustomModal({
         isOpen: true,
@@ -268,6 +292,7 @@ ${recordNote(p1Name, r1)}`,
       // AI 점수는 랭킹에 넣지 않는다
       const r1 = saveRecord(p1Name, finalP1Score, 'ai', '1P')
       submitRecords([r1])
+    if (finalP1Score > finalP2Score) dispenseCandy('beat_ai')
       const result = finalP1Score > finalP2Score ? 'AI를 이겼습니다.' : finalP1Score < finalP2Score ? 'AI가 이겼습니다.' : '무승부입니다.'
       setCustomModal({
         isOpen: true,
@@ -289,6 +314,7 @@ ${recordNote(p1Name, r1)}`,
     if (isCoop) {
       // 반쪽 협동은 팀 이름 하나로 팀 점수만 올린다
       const team = `${p1Name} & ${p2Name}`
+    dispenseCandy('coop_complete')
       const r = saveRecord(team, finalP1Score, 'coop', '1P')
       submitRecords([r])
       announce('반쪽 협동 완주', `${team} 팀 ${finalP1Score.toLocaleString()}점
@@ -299,6 +325,7 @@ ${recordNote(team, r)}`)
     const r1 = saveRecord(p1Name, finalP1Score, 'pvp', '1P')
     const r2 = saveRecord(p2Name, finalP2Score, 'pvp', '2P')
     submitRecords([r1, r2])
+    if (finalP1Score !== finalP2Score) dispenseCandy('pvp_winner')
     const winner = finalP1Score > finalP2Score ? `${p1Name}님 승리` : finalP1Score < finalP2Score ? `${p2Name}님 승리` : '무승부'
     announce(
       winner,
@@ -406,12 +433,18 @@ ${recordNote(p2Name, r2)}`,
     gameFinishedRef.current = false
   }
 
-  const handleSelect2PMode = () => {
+    const handleSelect2PMode = () => {
+    const newKeywords = pickRandomKeywords(TOTAL_ROUNDS)
+    setGameKeywords(newKeywords)
     setIsTwoPlayer(true)
     setIsVsAi(false)
     setIsCoop(false)
+    p1ReadyRef.current = false
+    p2ReadyRef.current = false
     setCabA('nickname1P')
+    setCabB('nickname2P')
     gameFinishedRef.current = false
+    postArcade('INIT_2P_MODE', { keywords: newKeywords, coop: false })
   }
 
   // 인간 vs AI: 사람 이름을 받은 뒤 2P 자리에 AI를 앉히고 바로 시작
@@ -424,17 +457,24 @@ ${recordNote(p2Name, r2)}`,
     gameFinishedRef.current = false
   }
 
-  // 반쪽 협동: 둘이 대결처럼 2P 이름을 받은 뒤 두 화면이 동시에 그린다
+  // 반쪽 협동: 2인 모드처럼 양쪽 화면에서 이름을 동시에 받는다
   const handleSelectCoopMode = () => {
+    const newKeywords = pickRandomKeywords(TOTAL_ROUNDS)
+    setGameKeywords(newKeywords)
     setIsTwoPlayer(true)
     setIsVsAi(false)
     setIsCoop(true)
+    p1ReadyRef.current = false
+    p2ReadyRef.current = false
     setCabA('nickname1P')
+    setCabB('nickname2P')
     gameFinishedRef.current = false
+    postArcade('INIT_2P_MODE', { keywords: newKeywords, coop: true })
   }
 
   const handleComplete1PName = (name: string) => {
     setP1Name(name)
+    p1ReadyRef.current = true
 
     if (isVsAi) {
       setP2Name(AI_NAME)
@@ -443,23 +483,34 @@ ${recordNote(p2Name, r2)}`,
       return
     }
 
-    const newKeywords = pickRandomKeywords(TOTAL_ROUNDS)
-    setGameKeywords(newKeywords)
-
     if (!isTwoPlayer) {
       setCabB('leaderboard')
       startSimultaneousCountdown()
+      return
+    }
+
+    // 2인 모드: 1P 준비 완료 알림
+    postArcade('P1_READY_TRIGGER', { p1Name: name })
+    if (p2ReadyRef.current) {
+      postArcade('TRIGGER_START', { p1Name: name, p2Name })
+      startSimultaneousCountdown()
     } else {
       setCabA('waiting2P')
-      setCabB('nickname2P')
-      postArcade('REQUEST_2P_MODE', { keywords: newKeywords, p1Name: name, coop: isCoop })
     }
   }
 
   const handleComplete2PName = (name: string) => {
     setP2Name(name)
+    p2ReadyRef.current = true
+
+    // 2인 모드: 2P 준비 완료 알림
     postArcade('P2_READY_TRIGGER', { p2Name: name })
-    startSimultaneousCountdown()
+    if (p1ReadyRef.current) {
+      postArcade('TRIGGER_START', { p1Name, p2Name: name })
+      startSimultaneousCountdown()
+    } else {
+      setCabB('waiting1P')
+    }
   }
 
   const handleDeleteRankingPrompt = (id: string, name: string) => {
@@ -482,6 +533,8 @@ ${recordNote(p2Name, r2)}`,
     setIsCoop(false)
     setCountdown(null)
     gameFinishedRef.current = false
+    p1ReadyRef.current = false
+    p2ReadyRef.current = false
     postArcade('GOTO_HOME')
   }
 
@@ -521,7 +574,7 @@ ${recordNote(p2Name, r2)}`,
     />
     )
 
-  const waiting2P = (
+    const waiting2P = (
     <Screen className="flex flex-col">
       <ArcadeBackground />
       <header className="relative px-14 pt-10">
@@ -530,7 +583,21 @@ ${recordNote(p2Name, r2)}`,
       <main className="relative flex-1 flex flex-col items-center justify-center gap-6 pb-16 text-center">
         <Spinner />
         <h2 className="font-display text-5xl">{p1Name}님 등록 완료</h2>
-        <p className="text-lg text-graphite">2P가 옆 화면에서 이름을 쓰고 있습니다.<br />입력이 끝나면 두 화면이 함께 시작합니다.</p>
+        <p className="text-lg text-graphite">2P가 화면에서 이름을 쓰고 있습니다.<br />입력이 끝나면 두 화면이 함께 시작합니다.</p>
+      </main>
+    </Screen>
+  )
+
+  const waiting1P = (
+    <Screen className="flex flex-col">
+      <ArcadeBackground />
+      <header className="relative px-14 pt-10">
+        <BackButton onClick={home}>취소</BackButton>
+      </header>
+      <main className="relative flex-1 flex flex-col items-center justify-center gap-6 pb-16 text-center">
+        <Spinner />
+        <h2 className="font-display text-5xl">{p2Name}님 등록 완료</h2>
+        <p className="text-lg text-graphite">1P가 화면에서 이름을 쓰고 있습니다.<br />입력이 끝나면 두 화면이 함께 시작합니다.</p>
       </main>
     </Screen>
   )
@@ -583,8 +650,9 @@ ${recordNote(p2Name, r2)}`,
         <div className="w-full h-full bg-white relative">
           {cabB === 'leaderboard' && leaderboard}
           {cabB === 'nickname2P' && (
-            <HangulKeyboard title="2P 이름을 써 주세요" subtitle={isCoop ? `${p1Name}님과 한 그림을 반씩 나눠 그립니다.` : `${p1Name}님과 대결합니다.`} onComplete={handleComplete2PName} onCancel={home} />
+            <HangulKeyboard title="2P 이름을 써 주세요" subtitle={isCoop ? '한 그림을 반씩 나눠 그립니다.' : '1P와 실시간 드로잉 대결을 펼칩니다.'} onComplete={handleComplete2PName} onCancel={home} />
           )}
+          {cabB === 'waiting1P' && waiting1P}
           {cabB === 'inGame' && renderGame('2P')}
         </div>
       )}
@@ -607,9 +675,10 @@ ${recordNote(p2Name, r2)}`,
           <div className="w-1/2 h-full relative">
             {cabB === 'leaderboard' && leaderboard}
             {cabB === 'nickname2P' && (
-              <HangulKeyboard title="2P 이름을 써 주세요" subtitle={isCoop ? `${p1Name}님과 한 그림을 반씩 나눠 그립니다.` : `${p1Name}님과 대결합니다.`} onComplete={handleComplete2PName} onCancel={home} />
+              <HangulKeyboard title="2P 이름을 써 주세요" subtitle={isCoop ? '한 그림을 반씩 나눠 그립니다.' : '1P와 실시간 드로잉 대결을 펼칩니다.'} onComplete={handleComplete2PName} onCancel={home} />
             )}
-            {cabB === 'inGame' && renderGame('2P')}
+            {cabB === 'waiting1P' && waiting1P}
+          {cabB === 'inGame' && renderGame('2P')}
           </div>
         </div>
       )}

@@ -22,3 +22,11 @@ logs/
 
 # 아케이드 랭킹 저장 파일 (vite.config.ts arcadeServer)
 /data/
+
+# Python & Environment
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+.claude/
+

@@ -7,7 +7,8 @@ import { recognizeDrawing } from '../utils/recognize'
 import { AdvancedAnalysisModal } from './Modals'
 import { Button, Label, Overlay, Panel, KeywordTitle } from './ui'
 import { INK, ToolBar, snapshotOf, useDrawingPad } from './DrawingPad'
-import { DrawStepsExample } from './Examples'
+import { DrawingTipsCard } from './DrawingTipsCard'
+
 
 const CANVAS_W = 1200
 const CANVAS_H = 750
@@ -98,7 +99,7 @@ export function ScreenGame({
     recogSeq.current++
 
     if (isAiPlayer) setStatusText('AI가 구도를 잡고 있습니다.')
-    else if (isMyTurn) setStatusText('연필로 형태를 잡고, 목탄으로 명암을 넣으세요.')
+    else if (isMyTurn) setStatusText('핵심 선 위주로 간결하게 특징을 표현해 보세요.')
     else setStatusText(`${drawerName}님이 그리고 있습니다.`)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round, activePlayer, isMyTurn, isAiPlayer, currentKeyword])
@@ -120,7 +121,7 @@ export function ScreenGame({
       const r = res?.rank ?? 0
       setRecognition(r, res?.list ?? [])
       setStatusText(res ? (r ? `${r}순위로 인식되었습니다.` : '인식되지 않았습니다.') : '인식 서버에 연결하지 못했습니다.')
-      setAnalysisReport(evaluateDrawing(canvas, doneAt, r, TURN_SEC))
+      setAnalysisReport(evaluateDrawing(canvas, doneAt, r, TURN_SEC, strokes))
     }
 
     createAiArtwork(currentKeyword.en, CANVAS_W, CANVAS_H).then(({ art, phases, strokes, complexity }) => {
@@ -182,7 +183,7 @@ export function ScreenGame({
   useEffect(() => {
     if (timeLeft === 0 && isMyTurn && !submitted && analysisReport === null && canvasRef.current) {
       pad.stopDrawing()
-      setAnalysisReport(evaluateDrawing(canvasRef.current, 0, rankRef.current, TURN_SEC))
+      setAnalysisReport(evaluateDrawing(canvasRef.current, 0, rankRef.current, TURN_SEC, pad.recognitionStrokes()))
     }
   }, [timeLeft, isMyTurn, analysisReport, submitted])
 
@@ -202,7 +203,7 @@ export function ScreenGame({
     }
     const r = res.rank
     setRecognition(r, res.list)
-    setStatusText(r ? `${r}순위로 알아봤습니다. 명암을 더하거나 바로 완성하세요.` : `${toKorean(res.list[0])}(으)로 보고 있습니다.`)
+    setStatusText(r ? `${r}순위로 알아봤습니다. 핵심 선을 다듬거나 바로 완성하세요.` : `${toKorean(res.list[0])}(으)로 보고 있습니다.`)
   }
 
   const clearCanvas = () => {
@@ -215,7 +216,7 @@ export function ScreenGame({
 
   const submit = () => {
     if (!canvasRef.current || analysisReport !== null || submitted) return
-    setAnalysisReport(evaluateDrawing(canvasRef.current, timeLeft, rankRef.current, TURN_SEC))
+    setAnalysisReport(evaluateDrawing(canvasRef.current, timeLeft, rankRef.current, TURN_SEC, pad.recognitionStrokes()))
   }
 
   const curTime = isNaN(timeLeft) ? 0 : timeLeft
@@ -357,24 +358,22 @@ export function ScreenGame({
             </div>
           </Panel>
 
-          <Panel className="p-6 flex-1 flex flex-col">
-            <Label>AI 판정</Label>
-            <p className="font-display text-xl leading-snug mt-3 min-h-[3.5rem]">{statusText}</p>
-            {guesses.length > 0 && (
-              <ol className="mt-5 flex flex-col gap-1.5">
-                {guesses.map((g, i) => (
-                  <li key={i} className={`flex items-center gap-3 px-3 py-2 rounded-xl ${rank === i + 1 ? 'bg-ok/10 text-ok' : ''}`}>
-                    <span className="w-5 text-sm font-bold text-graphite tabular-nums">{i + 1}</span>
-                    <span className="font-display text-lg">{g}</span>
-                  </li>
-                ))}
-              </ol>
-            )}
-            {isMyTurn && (
-              <div className="mt-auto pt-5">
-                <DrawStepsExample />
-              </div>
-            )}
+                    <Panel className="p-4 2xl:p-5 flex-1 flex flex-col justify-between overflow-hidden">
+            <div>
+              <Label>AI 판정</Label>
+              <p className="font-display text-lg 2xl:text-xl leading-snug mt-2 min-h-[2.5rem]">{statusText}</p>
+              {guesses.length > 0 && (
+                <ol className="mt-2.5 flex flex-col gap-1">
+                  {guesses.map((g, i) => (
+                    <li key={i} className={`flex items-center gap-2.5 px-2.5 py-1 rounded-lg ${rank === i + 1 ? 'bg-ok/10 text-ok' : ''}`}>
+                      <span className="w-4 text-xs font-bold text-graphite tabular-nums">{i + 1}</span>
+                      <span className="font-display text-base 2xl:text-lg truncate">{g}</span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+            <DrawingTipsCard />
           </Panel>
         </div>
       </div>

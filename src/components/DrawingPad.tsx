@@ -1,49 +1,20 @@
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import React, { useLayoutEffect, useRef, useState } from 'react'
 import { Button } from './ui'
 
-// 게임 화면들이 같이 쓰는 그림판: 도구(연필·목탄·문지르기·지우개), 붓 칠하기, 되돌리기, 도구 막대
+// 게임 화면들이 같이 쓰는 그림판: 도구(연필·지우개), 굵기 선택, 되돌리기, 전체 지우기
 
 export const INK = '#2B1A40'
 
-export type Tool = 'pencil' | 'charcoal' | 'blend' | 'eraser'
+export type Tool = 'pencil' | 'eraser'
 
 export const TOOLS: { id: Tool; label: string; hint: string }[] = [
-  { id: 'pencil', label: '연필', hint: '외곽선 · AI 인식용' },
-  { id: 'charcoal', label: '목탄', hint: '부드러운 명암' },
-  { id: 'blend', label: '문지르기', hint: '톤 번지게' },
-  { id: 'eraser', label: '지우개', hint: '하이라이트' },
-]
-export const SIZES: Record<Tool, number[]> = {
-  pencil: [3, 6, 11],
-  charcoal: [26, 48, 80],
-  blend: [24, 44, 72],
-  eraser: [16, 40, 90],
-}
-export const STRENGTHS = [
-  { label: '연하게', alpha: 0.05 },
-  { label: '보통', alpha: 0.1 },
-  { label: '진하게', alpha: 0.2 },
+  { id: 'pencil', label: '연필', hint: '외곽선 · 드로잉' },
+  { id: 'eraser', label: '지우개', hint: '수정 및 지우기' },
 ]
 
-// 목탄 붓 끝: 가장자리로 갈수록 옅어지고 종이 결처럼 거친 입자
-export function makeCharcoalDab(r: number) {
-  const c = document.createElement('canvas')
-  c.width = c.height = r * 2
-  const ctx = c.getContext('2d')!
-  const img = ctx.createImageData(r * 2, r * 2)
-  for (let y = 0; y < r * 2; y++) {
-    for (let x = 0; x < r * 2; x++) {
-      const d = Math.hypot(x - r + 0.5, y - r + 0.5) / r
-      if (d >= 1) continue
-      const i = (y * r * 2 + x) * 4
-      img.data[i] = 0x2b
-      img.data[i + 1] = 0x1a
-      img.data[i + 2] = 0x40
-      img.data[i + 3] = Math.round(255 * Math.pow(1 - d, 1.4) * (0.35 + 0.65 * Math.random()))
-    }
-  }
-  ctx.putImageData(img, 0, 0)
-  return c
+export const SIZES: Record<Tool, number[]> = {
+  pencil: [4, 8, 14],
+  eraser: [18, 42, 90],
 }
 
 // 그림이 있는 영역(+여백)을 캔버스와 같은 비율로 잡는다. 그림이 작아도 카드에 꽉 차 보이게
@@ -97,33 +68,27 @@ export function useDrawingPad({
   width: number
   height: number
   enabled: boolean
-  /** 획 하나를 다 그었을 때 (지우개·문지르기 제외). pencilCount = 지금까지 연필 획 수 */
+  /** 획 하나를 다 그었을 때 (지우개 제외). pencilCount = 지금까지 연필 획 수 */
   onStrokeEnd?: (tool: Tool, pencilCount: number) => void
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [tool, setTool] = useState<Tool>('pencil')
   const [sizeIdx, setSizeIdx] = useState(1)
-  const [strengthIdx, setStrengthIdx] = useState(1)
   const [drawing, setDrawing] = useState(false)
   const [hasDrawn, setHasDrawn] = useState(false)
   const [undoCount, setUndoCount] = useState(0)
   const last = useRef<{ x: number; y: number } | null>(null)
 
-  // 연필 획은 AI 인식에 쓰고, 명암 획은 연필이 없을 때만 대신 쓴다
   const pencilStrokesRef = useRef<number[][][]>([])
-  const otherStrokesRef = useRef<number[][][]>([])
   const currentStrokeRef = useRef<{ x: number[]; y: number[]; t: number[] }>({ x: [], y: [], t: [] })
   const strokeStartRef = useRef(0)
-  const undoRef = useRef<{ image: ImageData; pencil: number; other: number }[]>([])
+  const undoRef = useRef<{ image: ImageData; pencil: number }[]>([])
   const onStrokeEndRef = useRef(onStrokeEnd)
   onStrokeEndRef.current = onStrokeEnd
-
-  const dabs = useMemo(() => (typeof document === 'undefined' ? [] : SIZES.charcoal.map(s => makeCharcoalDab(Math.round(s / 2)))), [])
 
   const reset = () => {
     canvasRef.current?.getContext('2d')!.clearRect(0, 0, width, height)
     pencilStrokesRef.current = []
-    otherStrokesRef.current = []
     undoRef.current = []
     setUndoCount(0)
     setHasDrawn(false)
@@ -140,14 +105,13 @@ export function useDrawingPad({
 
   const pushUndo = () => {
     const ctx = canvasRef.current!.getContext('2d')!
-    undoRef.current.push({ image: ctx.getImageData(0, 0, width, height), pencil: pencilStrokesRef.current.length, other: otherStrokesRef.current.length })
+    undoRef.current.push({ image: ctx.getImageData(0, 0, width, height), pencil: pencilStrokesRef.current.length })
     if (undoRef.current.length > 12) undoRef.current.shift()
     setUndoCount(undoRef.current.length)
   }
 
   const paint = (from: { x: number; y: number }, to: { x: number; y: number }, pressure: number) => {
-    const canvas = canvasRef.current!
-    const ctx = canvas.getContext('2d')!
+    const ctx = canvasRef.current!.getContext('2d')!
     const size = SIZES[tool][sizeIdx]
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
@@ -168,29 +132,6 @@ export function useDrawingPad({
       ctx.lineTo(to.x, to.y)
       ctx.stroke()
       ctx.globalCompositeOperation = 'source-over'
-    } else {
-      const r = size / 2
-      const dist = Math.hypot(to.x - from.x, to.y - from.y)
-      const steps = Math.max(1, Math.ceil(dist / (r * 0.3)))
-      for (let i = 1; i <= steps; i++) {
-        const x = from.x + ((to.x - from.x) * i) / steps
-        const y = from.y + ((to.y - from.y) * i) / steps
-        if (tool === 'charcoal') {
-          ctx.globalAlpha = Math.min(1, STRENGTHS[strengthIdx].alpha * (0.5 + pressure))
-          ctx.drawImage(dabs[sizeIdx], x - r, y - r)
-        } else {
-          // 문지르기: 직전 위치의 톤을 끌고 와서 번지게
-          const px = from.x + ((to.x - from.x) * (i - 1)) / steps
-          const py = from.y + ((to.y - from.y) * (i - 1)) / steps
-          ctx.save()
-          ctx.beginPath()
-          ctx.arc(x, y, r, 0, Math.PI * 2)
-          ctx.clip()
-          ctx.globalAlpha = 0.45
-          ctx.drawImage(canvas, px - r, py - r, r * 2, r * 2, x - r, y - r, r * 2, r * 2)
-          ctx.restore()
-        }
-      }
     }
     ctx.globalAlpha = 1
   }
@@ -227,8 +168,8 @@ export function useDrawingPad({
     setDrawing(false)
     last.current = null
     const s = currentStrokeRef.current
-    if (tool === 'eraser' || tool === 'blend' || s.x.length === 0) return
-    ;(tool === 'pencil' ? pencilStrokesRef : otherStrokesRef).current.push([s.x, s.y, s.t])
+    if (tool === 'eraser' || s.x.length === 0) return
+    pencilStrokesRef.current.push([s.x, s.y, s.t])
     onStrokeEndRef.current?.(tool, pencilStrokesRef.current.length)
   }
 
@@ -239,8 +180,7 @@ export function useDrawingPad({
     if (!snap || !canvasRef.current) return false
     canvasRef.current.getContext('2d')!.putImageData(snap.image, 0, 0)
     pencilStrokesRef.current = pencilStrokesRef.current.slice(0, snap.pencil)
-    otherStrokesRef.current = otherStrokesRef.current.slice(0, snap.other)
-    setHasDrawn(pencilStrokesRef.current.length + otherStrokesRef.current.length > 0)
+    setHasDrawn(pencilStrokesRef.current.length > 0)
     return true
   }
 
@@ -249,16 +189,15 @@ export function useDrawingPad({
     pushUndo()
     canvasRef.current.getContext('2d')!.clearRect(0, 0, width, height)
     pencilStrokesRef.current = []
-    otherStrokesRef.current = []
     setHasDrawn(false)
   }
 
-  /** AI 인식에 보낼 획: 연필이 있으면 연필만, 없으면 명암 획 */
-  const recognitionStrokes = () => (pencilStrokesRef.current.length ? pencilStrokesRef.current : otherStrokesRef.current)
+  /** AI 인식에 보낼 획 */
+  const recognitionStrokes = () => pencilStrokesRef.current
 
   return {
     canvasRef,
-    tool, setTool, sizeIdx, setSizeIdx, strengthIdx, setStrengthIdx,
+    tool, setTool, sizeIdx, setSizeIdx,
     hasDrawn, undoCount,
     reset, undo, clear, recognitionStrokes,
     stopDrawing: () => setDrawing(false),
@@ -268,7 +207,7 @@ export function useDrawingPad({
 
 export type DrawingPad = ReturnType<typeof useDrawingPad>
 
-/** 도구 · 굵기 · 진하기 고르기 + 되돌리기 · 전체 지우기 · 완성 */
+/** 도구 · 굵기 고르기 + 되돌리기 · 전체 지우기 · 완성 */
 export function ToolBar({
   pad,
   disabled,
@@ -287,8 +226,7 @@ export function ToolBar({
   onSubmit: () => void
   submitDisabled: boolean
 }) {
-  const { tool, setTool, sizeIdx, setSizeIdx, strengthIdx, setStrengthIdx } = pad
-  // 막대 폭을 직접 재서 맞춘다. 화면 배율·창 크기와 상관없이 한 줄에 다 들어가고 완성 버튼이 가려지지 않게
+  const { tool, setTool, sizeIdx, setSizeIdx } = pad
   const ref = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(1200)
   useLayoutEffect(() => {
@@ -298,18 +236,17 @@ export function ToolBar({
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
-  const roomy = width >= 1150
-  const tight = width < 960
+  const roomy = width >= 900
+  const tight = width < 700
 
-  const toolPad = roomy ? 'px-5' : tight ? 'px-2' : 'px-3'
-  const sizeW = roomy ? 'w-14' : tight ? 'w-9' : 'w-11'
-  const strengthPad = roomy ? 'px-4' : tight ? 'px-1.5' : 'px-2.5'
+  const toolPad = roomy ? 'px-6' : tight ? 'px-3' : 'px-4'
+  const sizeW = roomy ? 'w-14' : tight ? 'w-10' : 'w-12'
   const iconBtn = 'w-11 px-0'
 
   return (
-    // 한 줄에 모두 놓고, 남는 폭은 완성 버튼이 채워서 빈자리가 생기지 않게 한다
-    <div ref={ref} className={`flex items-center gap-2 whitespace-nowrap ${disabled ? 'opacity-35 pointer-events-none' : ''}`}>
-      <div className="flex shrink-0 bg-white border-2 border-line rounded-2xl p-1">
+    <div ref={ref} className={`flex items-center gap-3 whitespace-nowrap ${disabled ? 'opacity-35 pointer-events-none' : ''}`}>
+      {/* 도구 선택: 연필 / 지우개 */}
+      <div className="flex shrink-0 bg-white border-2 border-line rounded-2xl p-1 shadow-sm">
         {TOOLS.map(t => (
           <button
             key={t.id}
@@ -323,7 +260,8 @@ export function ToolBar({
         ))}
       </div>
 
-      <div className="flex shrink-0 bg-white border-2 border-line rounded-2xl p-1">
+      {/* 굵기 선택 (소 / 중 / 대) */}
+      <div className="flex shrink-0 bg-white border-2 border-line rounded-2xl p-1 shadow-sm">
         {SIZES[tool].map((s, i) => (
           <button
             key={i}
@@ -332,32 +270,13 @@ export function ToolBar({
             aria-label={`굵기 ${i + 1}`}
             className={`${sizeW} h-14 rounded-xl flex items-center justify-center transition-colors ${sizeIdx === i ? 'bg-paper ring-2 ring-ink' : 'hover:bg-paper'}`}
           >
-            <span className="rounded-full bg-ink" style={{ width: 6 + i * 7, height: 6 + i * 7, opacity: tool === 'charcoal' ? 0.55 : 1 }} />
+            <span className="rounded-full bg-ink" style={{ width: 6 + i * 8, height: 6 + i * 8 }} />
           </button>
         ))}
       </div>
 
-      {/* 진하기는 목탄에서만 쓴다. 늘 보이게 두되 다른 도구일 때는 흐리게 잠가서, 빈자리도 버튼 밀림도 없게 */}
-      <div
-        className={`flex shrink-0 bg-white border-2 border-line rounded-2xl p-1 transition-opacity ${tool === 'charcoal' ? '' : 'opacity-35 pointer-events-none'}`}
-        aria-disabled={tool !== 'charcoal'}
-        title={tool === 'charcoal' ? undefined : '목탄 진하기'}
-      >
-        {STRENGTHS.map((s, i) => (
-          <button
-            key={s.label}
-            type="button"
-            tabIndex={tool === 'charcoal' ? 0 : -1}
-            onClick={() => setStrengthIdx(i)}
-            className={`h-14 ${strengthPad} rounded-xl font-display ${tight ? 'text-base' : 'text-lg'} transition-colors ${strengthIdx === i ? 'bg-ink text-white' : 'hover:bg-paper'}`}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
-
-      {/* 좁을 때는 되돌리기·전체 지우기를 아이콘으로 줄인다 */}
-      <Button variant="secondary" size="sm" className={tight ? iconBtn : ''} title="되돌리기" onClick={() => pad.undo() && onUndo?.()} disabled={pad.undoCount === 0}>
+      {/* 되돌리기 */}
+      <Button variant="secondary" size="sm" className={tight ? iconBtn : 'h-14 px-4'} title="되돌리기" onClick={() => pad.undo() && onUndo?.()} disabled={pad.undoCount === 0}>
         {tight ? (
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-label="되돌리기">
             <path d="M7.5 5L3.5 9l4 4M4 9h7.5a4.5 4.5 0 010 9H9" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -366,7 +285,9 @@ export function ToolBar({
           '되돌리기'
         )}
       </Button>
-      <Button variant="secondary" size="sm" className={tight ? iconBtn : ''} title="전체 지우기" onClick={onClear}>
+
+      {/* 전체 지우기 */}
+      <Button variant="secondary" size="sm" className={tight ? iconBtn : 'h-14 px-4'} title="전체 지우기" onClick={onClear}>
         {tight ? (
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-label="전체 지우기">
             <path d="M4 6h12M8 6V4h4v2M6 6l.8 10h6.4L14 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -375,7 +296,9 @@ export function ToolBar({
           '전체 지우기'
         )}
       </Button>
-      <Button size="md" className="flex-1 min-w-24" onClick={onSubmit} disabled={submitDisabled}>
+
+      {/* 완성 / 제출 버튼 */}
+      <Button size="md" className="flex-1 min-w-28 h-14 text-xl" onClick={onSubmit} disabled={submitDisabled}>
         {submitLabel}
       </Button>
     </div>

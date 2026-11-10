@@ -1,4 +1,4 @@
-import type { RankItem } from '../types'
+import type { RankItem } from '../types.ts'
 
 // 랭킹 규칙 (서버와 브라우저가 같이 쓴다): 이름마다 최고 기록 한 줄, 점수 내림차순 Top 10
 // 서버는 모든 게임 기록(history)을 그대로 두고, 명예의 전당은 거기서 이 규칙으로 뽑는다

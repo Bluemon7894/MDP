@@ -5,7 +5,7 @@ import { evaluateDrawing } from '../utils/scoring'
 import { recognizeDrawing } from '../utils/recognize'
 import { AdvancedAnalysisModal } from './Modals'
 import { ToolBar, snapshotOf, useDrawingPad } from './DrawingPad'
-import { DrawStepsExample } from './Examples'
+import { DrawingTipsCard } from './DrawingTipsCard'
 import { BackButton, Button, Label, Panel, KeywordTitle } from './ui'
 
 const CANVAS_W = 1200
@@ -64,7 +64,7 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
   const judge = (left: number) => {
     if (!canvasRef.current || report) return
     pad.stopDrawing()
-    setReport(evaluateDrawing(canvasRef.current, left, rankRef.current, TURN_SEC))
+    setReport(evaluateDrawing(canvasRef.current, left, rankRef.current, TURN_SEC, pad.recognitionStrokes()))
   }
 
   useEffect(() => {
@@ -179,22 +179,22 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
         </div>
 
         <div className="w-64 2xl:w-80 flex flex-col gap-5 shrink-0">
-          <Panel className="p-6 flex-1 flex flex-col">
-            <Label>AI 판정</Label>
-            <p className="font-display text-xl leading-snug mt-3 min-h-[3.5rem]">{status}</p>
-            {guesses.length > 0 && (
-              <ol className="mt-4 flex flex-col gap-1.5">
-                {guesses.map((g, i) => (
-                  <li key={i} className={`flex items-center gap-3 px-3 py-2 rounded-xl ${rank === i + 1 ? 'bg-ok/10 text-ok' : ''}`}>
-                    <span className="w-5 text-sm font-bold text-graphite tabular-nums">{i + 1}</span>
-                    <span className="font-display text-lg">{g}</span>
-                  </li>
-                ))}
-              </ol>
-            )}
-            <div className="mt-auto pt-5">
-              <DrawStepsExample />
+                    <Panel className="p-4 2xl:p-5 flex-1 flex flex-col justify-between overflow-hidden">
+            <div>
+              <Label>AI 판정</Label>
+              <p className="font-display text-lg 2xl:text-xl leading-snug mt-2 min-h-[2.5rem]">{status}</p>
+              {guesses.length > 0 && (
+                <ol className="mt-2.5 flex flex-col gap-1">
+                  {guesses.map((g, i) => (
+                    <li key={i} className={`flex items-center gap-2.5 px-2.5 py-1 rounded-lg ${rank === i + 1 ? 'bg-ok/10 text-ok' : ''}`}>
+                      <span className="w-4 text-xs font-bold text-graphite tabular-nums">{i + 1}</span>
+                      <span className="font-display text-base 2xl:text-lg truncate">{g}</span>
+                    </li>
+                  ))}
+                </ol>
+              )}
             </div>
+            <DrawingTipsCard />
           </Panel>
         </div>
       </div>
