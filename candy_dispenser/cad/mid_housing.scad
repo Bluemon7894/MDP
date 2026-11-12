@@ -1,16 +1,20 @@
 // ==============================================================================
 // CANDY DISPENSER - MID HOUSING (DRUM CHAMBER, DIRECTIONAL INLET & M4 BOLTS)
 // ==============================================================================
-// Features 24mm directional inlet matching hopper throat for 100% candy alignment.
+// Features 28mm directional inlet matching hopper throat for 100% candy alignment.
 // Complete food/electronics physical isolation wall.
 // 20-Series M4 clearance holes for corner columns & service panel.
+//
+// LEFT WALL ACCESS PORT: Features 73mm circular drum insertion opening allowing
+// the 66mm metering drum to slide in easily from the side, then capped with
+// drum_bearing_cap.stl using 2x M4 bolts. Allows instant 10s drum removal for cleaning!
 // ==============================================================================
 
 include <config.scad>;
 
 drum_center_y = 70.0;
 drum_center_z = 52.0;
-drum_chamber_r = drum_dia / 2 + drum_wall_gap;
+drum_chamber_r = 36.0; // 72mm dia gives smooth 1.0mm running clearance for 71mm agitator ribs
 
 module mid_housing() {
     difference() {
@@ -45,7 +49,7 @@ module mid_housing() {
             rotate([0, 90, 0])
                 cylinder(r = drum_chamber_r, h = divider_x - 3.5);
 
-        // Top directional inlet opening (24mm wide matching hopper throat)
+        // Top directional inlet opening (28mm wide matching hopper throat)
         translate([10.0, drum_center_y - hopper_throat_w / 2, drum_center_z])
             cube([hopper_throat_l, hopper_throat_w, mid_height - drum_center_z + 1]);
 
@@ -60,10 +64,22 @@ module mid_housing() {
                 cube([drum_len - 4, 45, 2]);
         }
 
-        // Left wall pivot bearing socket for drum left boss
+        // Left wall drum insertion opening (allows 66mm drum to slide in from left)
+        translate([-2, drum_center_y, drum_center_z])
+            rotate([0, 90, 0])
+                cylinder(d = 73.0, h = 10.0);
+
+        // Centering recess for drum_bearing_cap (81mm diameter, 1.8mm depth)
         translate([-1, drum_center_y, drum_center_z])
             rotate([0, 90, 0])
-                cylinder(d = 12.8, h = 6.0);
+                cylinder(d = 81.0, h = 2.0);
+
+        // 2x M4 Mounting Screw Pilot Holes for drum_bearing_cap (Front & Rear, 3.8mm tap)
+        for (dy = [-45.0, 45.0]) {
+            translate([-1, drum_center_y + dy, drum_center_z])
+                rotate([0, 90, 0])
+                    cylinder(d = m4_tap_dia, h = 12.0);
+        }
 
         // Front Retro Display Window cutout
         translate([12, -2, 35])

@@ -88,8 +88,9 @@ def main():
         # (filename, rotation, translation)
         ("base_chassis.stl",   [0, 0, 0],   [0, 0, 0]),
         ("mid_housing.stl",    [0, 0, 0],   [0, 0, 45.0]),
-        ("drum_dispenser.stl", [0, 90, 0],  [10.0, 70.0, 97.0]),
-        ("service_panel.stl",  [90, 0, 0],  [75.0, 135.0, 53.0]),
+        ("drum_dispenser.stl",   [0, 90, 0],  [10.0, 70.0, 97.0]),
+        ("drum_bearing_cap.stl", [0, -90, 0], [0.0, 70.0, 97.0]),
+        ("service_panel.stl",    [90, 0, 0],  [75.0, 135.0, 53.0]),
         ("top_hopper.stl",     [0, 0, 0],   [0, 0, 140.0]),
         ("top_lid.stl",        [0, 0, 0],   [6.35, 8.35, 221.0]),
     ]
