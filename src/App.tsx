@@ -6,6 +6,7 @@ import { bestScoreIn } from './utils/rankingCore'
 import { GalleryItem, postGallery } from './utils/gallery'
 import { postArcade, onArcade, onRankingsChanged, ArcadeMessage } from './utils/arcadeSync'
 import { dispenseCandy } from './utils/candyDispenser'
+import { calmBgm } from './utils/calmBgm'
 
 import { CustomAlertModal, ArcadeBackground } from './components/CommonUI'
 import { HangulKeyboard } from './components/HangulKeyboard'
@@ -55,6 +56,29 @@ export default function App() {
     message: '',
     type: 'alert',
   })
+
+  // 잔잔한 BGM 활성화 상태 (브라우저 최초 상호작용 시 자동 시작)
+  const [bgmEnabled, setBgmEnabled] = useState(false)
+
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      calmBgm.start()
+      setBgmEnabled(true)
+      window.removeEventListener('click', handleFirstInteraction)
+      window.removeEventListener('keydown', handleFirstInteraction)
+      window.removeEventListener('touchstart', handleFirstInteraction)
+    }
+
+    window.addEventListener('click', handleFirstInteraction)
+    window.addEventListener('keydown', handleFirstInteraction)
+    window.addEventListener('touchstart', handleFirstInteraction)
+
+    return () => {
+      window.removeEventListener('click', handleFirstInteraction)
+      window.removeEventListener('keydown', handleFirstInteraction)
+      window.removeEventListener('touchstart', handleFirstInteraction)
+    }
+  }, [])
 
   const gameFinishedRef = useRef(false)
   const p1ReadyRef = useRef(false)
@@ -611,9 +635,21 @@ ${recordNote(p2Name, r2)}`,
         onClose={() => setCustomModal({ isOpen: false, title: '', message: '', type: 'alert' })}
       />
 
-      {/* 개발용 화면 전환: 홈·랭킹 화면에서만 (다른 화면의 버튼과 겹치지 않게) */}
+      {/* BGM On/Off 및 화면 전환 버튼 */}
       {!isPlayingGame && (cabA === 'idle' || (screenMode === 'b' && cabB === 'leaderboard')) && (
-        <div className="absolute top-3 right-3 z-50 flex gap-1 p-1 rounded-xl bg-white/80 border border-black/5 opacity-30 hover:opacity-100 transition-opacity font-ui">
+        <div className="absolute top-3 right-3 z-50 flex items-center gap-2 p-1 rounded-xl bg-white/80 border border-black/5 opacity-40 hover:opacity-100 transition-opacity font-ui">
+          <button
+            type="button"
+            onClick={() => {
+              const active = calmBgm.toggle()
+              setBgmEnabled(active)
+            }}
+            className={`px-3 h-8 rounded-lg text-xs font-bold transition-all ${
+              bgmEnabled ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-700'
+            }`}
+          >
+            {bgmEnabled ? 'BGM ON' : 'BGM OFF'}
+          </button>
           {(['a', 'b'] as const).map(s => (
             <button
               key={s}
