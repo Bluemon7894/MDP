@@ -293,6 +293,18 @@ export default function App() {
         ? `${name}님의 최고 기록을 ${r.prevBest.toLocaleString()}점에서 갱신했습니다.`
         : `${name}님의 기존 최고 기록 ${r.prevBest.toLocaleString()}점이 유지됩니다.`
 
+  // 넉넉한 사탕 재고(900개) 기준 점수별 사탕 지급 개수 계산
+  const soloCandyCount = (score: number) => (score >= 5000 ? 3 : score >= 3000 ? 2 : score >= 1000 ? 1 : 0)
+  const coopCandyCount = (score: number) => (score >= 5500 ? 4 : score >= 3500 ? 3 : score >= 1000 ? 2 : 0)
+  const pvpCandyCount = (s1: number, s2: number) => {
+    const base = (s1 >= 1000 ? 1 : 0) + (s2 >= 1000 ? 1 : 0)
+    const top = Math.max(s1, s2)
+    const bonus = (top >= 3000 ? 1 : 0) + (top >= 5000 ? 1 : 0)
+    return Math.min(4, base + bonus)
+  }
+  const candyNotice = (count: number) =>
+    count > 0 ? `사탕 ${count}개가 나옵니다! 아래 배출구를 확인하세요.` : `1,000점 이상 달성 시 사탕이 지급됩니다.`
+
   const finishGameAndSaveRanking = (finalP1Score: number, finalP2Score: number) => {
     if (gameFinishedRef.current) return
     gameFinishedRef.current = true
@@ -300,15 +312,15 @@ export default function App() {
 
     if (!isTwoPlayer) {
       const r1 = saveRecord(p1Name, finalP1Score, 'solo', '1P')
-    dispenseCandy('solo_complete')
+      const candies = soloCandyCount(finalP1Score)
+      if (candies > 0) dispenseCandy(`solo_${finalP1Score}`, candies)
       sound.playVictory()
       submitRecords([r1])
       setCustomModal({
         isOpen: true,
         type: 'alert',
         title: `${TOTAL_ROUNDS}라운드 완주`,
-        message: `${p1Name}님의 최종 점수는 ${finalP1Score.toLocaleString()}점입니다.
-${recordNote(p1Name, r1)}`,
+        message: `${p1Name}님의 최종 점수는 ${finalP1Score.toLocaleString()}점입니다.\n${recordNote(p1Name, r1)}\n${candyNotice(candies)}`,
         onConfirm: () => home(),
       })
       return
@@ -318,16 +330,17 @@ ${recordNote(p1Name, r1)}`,
       // AI 점수는 랭킹에 넣지 않는다
       const r1 = saveRecord(p1Name, finalP1Score, 'ai', '1P')
       submitRecords([r1])
-    if (finalP1Score > finalP2Score) dispenseCandy('beat_ai')
+      const beatAi = finalP1Score > finalP2Score
+      const candies = beatAi ? 3 : soloCandyCount(finalP1Score)
+      if (candies > 0) dispenseCandy(beatAi ? 'beat_ai' : `ai_try_${finalP1Score}`, candies)
       if (finalP1Score >= finalP2Score) sound.playVictory()
       else sound.playDefeat()
-      const result = finalP1Score > finalP2Score ? 'AI를 이겼습니다.' : finalP1Score < finalP2Score ? 'AI가 이겼습니다.' : '무승부입니다.'
+      const result = beatAi ? 'AI를 이겼습니다.' : finalP1Score < finalP2Score ? 'AI가 이겼습니다.' : '무승부입니다.'
       setCustomModal({
         isOpen: true,
         type: 'alert',
         title: result,
-        message: `${p1Name} ${finalP1Score.toLocaleString()}점 · AI ${finalP2Score.toLocaleString()}점
-${recordNote(p1Name, r1)}`,
+        message: `${p1Name} ${finalP1Score.toLocaleString()}점 · AI ${finalP2Score.toLocaleString()}점\n${recordNote(p1Name, r1)}\n${candyNotice(candies)}`,
         onConfirm: () => home(),
       })
       return
@@ -342,26 +355,25 @@ ${recordNote(p1Name, r1)}`,
     if (isCoop) {
       // 반쪽 협동은 팀 이름 하나로 팀 점수만 올린다
       const team = `${p1Name} & ${p2Name}`
-    dispenseCandy('coop_complete')
+      const candies = coopCandyCount(finalP1Score)
+      if (candies > 0) dispenseCandy(`coop_${finalP1Score}`, candies)
       sound.playVictory()
       const r = saveRecord(team, finalP1Score, 'coop', '1P')
       submitRecords([r])
-      announce('반쪽 협동 완주', `${team} 팀 ${finalP1Score.toLocaleString()}점
-${recordNote(team, r)}`)
+      announce('반쪽 협동 완주', `${team} 팀 ${finalP1Score.toLocaleString()}점\n${recordNote(team, r)}\n${candyNotice(candies)}`)
       return
     }
 
     const r1 = saveRecord(p1Name, finalP1Score, 'pvp', '1P')
     const r2 = saveRecord(p2Name, finalP2Score, 'pvp', '2P')
     submitRecords([r1, r2])
-    if (finalP1Score !== finalP2Score) dispenseCandy('pvp_winner')
+    const candies = pvpCandyCount(finalP1Score, finalP2Score)
+    if (candies > 0) dispenseCandy(`pvp_${finalP1Score}_${finalP2Score}`, candies)
     sound.playVictory()
     const winner = finalP1Score > finalP2Score ? `${p1Name}님 승리` : finalP1Score < finalP2Score ? `${p2Name}님 승리` : '무승부'
     announce(
       winner,
-      `${p1Name} ${finalP1Score.toLocaleString()}점 · ${p2Name} ${finalP2Score.toLocaleString()}점
-${recordNote(p1Name, r1)}
-${recordNote(p2Name, r2)}`,
+      `${p1Name} ${finalP1Score.toLocaleString()}점 · ${p2Name} ${finalP2Score.toLocaleString()}점\n${recordNote(p1Name, r1)}\n${recordNote(p2Name, r2)}\n${candyNotice(candies)}`,
     )
   }
 

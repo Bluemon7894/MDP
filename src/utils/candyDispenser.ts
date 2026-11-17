@@ -5,7 +5,7 @@
 
 const getDispenserBaseUrl = (): string => {
   if (typeof window === 'undefined') return 'http://localhost:8080'
-  
+
   // 1. LocalStorage override if custom IP was set
   const savedHost = localStorage.getItem('DISPENSER_HOST')
   if (savedHost) {
@@ -19,6 +19,7 @@ const getDispenserBaseUrl = (): string => {
 
 export interface DispenseResult {
   success: boolean
+  count: number
   message: string
 }
 
@@ -26,11 +27,15 @@ export interface DispenseResult {
  * Triggers a physical candy dispense operation on the Raspberry Pi 5.
  * Non-blocking with 5s timeout; safe to call without crashing the game if hardware is offline.
  */
-export async function dispenseCandy(reason = 'victory'): Promise<DispenseResult> {
+export async function dispenseCandy(reason = 'victory', count = 1): Promise<DispenseResult> {
+  if (count <= 0) {
+    return { success: true, count: 0, message: '' }
+  }
+
   const baseUrl = getDispenserBaseUrl()
   const endpoint = `${baseUrl}/dispense`
 
-  console.log(`[CANDY DISPENSER] Triggering candy dispense (Reason: ${reason}) -> ${endpoint}`)
+  console.log(`[CANDY DISPENSER] Triggering ${count} candy dispense (Reason: ${reason}) -> ${endpoint}`)
 
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), 5000)
@@ -39,23 +44,23 @@ export async function dispenseCandy(reason = 'victory'): Promise<DispenseResult>
     const res = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reason, timestamp: Date.now() }),
+      body: JSON.stringify({ reason, count, timestamp: Date.now() }),
       signal: controller.signal,
     })
     clearTimeout(timeoutId)
 
     if (res.ok) {
-      console.log('[CANDY DISPENSER] Physical candy dispensed successfully!')
-      return { success: true, message: '사탕이 성공적으로 배출되었습니다!' }
+      console.log(`[CANDY DISPENSER] Queued ${count} physical candy dispense(s) successfully!`)
+      return { success: true, count, message: `사탕 ${count}개가 배출됩니다!` }
     } else {
       console.warn(`[CANDY DISPENSER] Server returned HTTP ${res.status}`)
-      return { success: false, message: `배출 서버 응답 오류: ${res.status}` }
+      return { success: false, count: 0, message: `배출 서버 응답 오류: ${res.status}` }
     }
   } catch (err: any) {
     clearTimeout(timeoutId)
     const errMsg = err.name === 'AbortError' ? '디스펜서 연결 시간 초과' : err.message
     console.warn(`[CANDY DISPENSER] Dispense request failed: ${errMsg}`)
-    return { success: false, message: `디스펜서 통신 실패: ${errMsg}` }
+    return { success: false, count: 0, message: `디스펜서 통신 실패: ${errMsg}` }
   }
 }
 
