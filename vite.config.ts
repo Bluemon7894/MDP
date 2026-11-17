@@ -14,6 +14,11 @@ import type { RankItem } from './src/types.ts'
 export default defineConfig(({ mode }) => {
   // .figma/make/deploy-preview passes `--mode development` for cached-preview builds.
   const emitSourcemaps = mode === 'development'
+  const rootDir = import.meta.dirname ?? path.resolve('.')
+  const prebuiltCss = path.join(rootDir, '.prebuilt', 'index.css')
+  const usePrebuiltCss =
+    fs.existsSync(prebuiltCss) &&
+    (process.env.SKIP_TAILWIND === '1' || (process.platform === 'linux' && (process.arch === 'arm64' || process.arch === 'arm')))
 
   return {
     base: process.env.FIGMA_PUBLIC_URL ? `${process.env.FIGMA_PUBLIC_URL}/` : '/',
@@ -22,17 +27,17 @@ export default defineConfig(({ mode }) => {
       minify: !emitSourcemaps,
     },
     plugins: [
-react(),
-      tailwindcss(),
+      react(),
+      usePrebuiltCss ? prebuiltCssFallback(prebuiltCss) : tailwindcss(),
       figmaSiteConfiguration(siteConfiguration),
       figmaErrorOverlayReplay(),
       figmaReactRefreshBoundaryFallback(),
       figmaMakeKitPlugin({ storiesGlob: '/src/**/*.stories.{ts,tsx,js,jsx}' }),
-      arcadeServer(path.resolve((import.meta.dirname ?? path.resolve('.')), 'data')),
+      arcadeServer(path.resolve(rootDir, 'data')),
     ],
     resolve: {
       alias: {
-        '@': path.resolve((import.meta.dirname ?? path.resolve('.')), './src'),
+        '@': path.resolve(rootDir, './src'),
       },
     },
     server: {
@@ -44,6 +49,7 @@ react(),
           '**/.figma/**',
           '**/data/**',
           '**/candy_dispenser/**',
+          '**/.prebuilt/**',
 ],
       },
     },
@@ -53,6 +59,20 @@ react(),
     },
   }
 })
+
+function prebuiltCssFallback(prebuiltFile: string): Plugin {
+  return {
+    name: 'prebuilt-css-fallback',
+    enforce: 'pre',
+    load(id) {
+      const clean = id.split('?')[0].replace(/\\/g, '/')
+      if (clean.endsWith('/src/index.css')) {
+        return fs.readFileSync(prebuiltFile, 'utf-8')
+      }
+      return null
+    },
+  }
+}
 
 /**
  * 아케이드 공용 서버. 랭킹과 두 화면 사이 메시지를 브라우저가 아니라 이 서버에 둬서
