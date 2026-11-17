@@ -7,6 +7,7 @@ import { sound } from '../utils/sound'
 import { AdvancedAnalysisModal } from './Modals'
 import { ToolBar, snapshotOf, useDrawingPad } from './DrawingPad'
 import { GuessBoard, toGuessItems } from './GuessBoard'
+import { EGG_TEXT, rollGarbageEgg } from '../utils/easterEgg'
 import { BackButton, Button, Label, Panel, KeywordTitle } from './ui'
 
 const CANVAS_W = 1200
@@ -20,6 +21,8 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
   const [guesses, setGuesses] = useState<string[]>([])
   // AI 판정 칸을 채우는 긴 추론 키워드 목록 (한글)
   const [moreGuesses, setMoreGuesses] = useState<string[]>([])
+  // 깜짝 이스터에그: 알아볼 수 없는 그림에 아주 가끔 "뭘 그리신 거에요...?" 만 띄우고 후보를 비운다
+  const [egg, setEgg] = useState(false)
   const [rank, setRank] = useState(0)
   const [status, setStatus] = useState('아무거나 그려 보세요. AI가 무엇으로 보는지 바로 알려 줍니다.')
   const [report, setReport] = useState<MetricBreakdown | null>(null)
@@ -30,24 +33,44 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
   const bestRankRef = useRef(0)
   rankRef.current = rank
 
-  const runRecognition = async () => {
+  // 마지막으로 인식을 마친 그림 (획마다 점 수). 채점 직전에 지금 그림과 다르면 한 번 더 본다
+  const strokesSig = () => pad.recognitionStrokes().map(st => st[0].length).join(',')
+  const recognizedSigRef = useRef<string | null>(null)
+  const finishingRef = useRef(false)
+
+  /** 인식이 끝나면 순위를, 더 새 인식에 밀렸거나 실패하면 null */
+  const runRecognition = async (): Promise<number | null> => {
     const strokes = pad.recognitionStrokes()
     if (!strokes.length) {
       setGuesses([])
       setMoreGuesses([])
+      setEgg(false)
       setRank(0)
-    bestRankRef.current = 0
-      return
+      rankRef.current = 0
+      bestRankRef.current = 0
+      recognizedSigRef.current = ''
+      return 0
     }
+    const sig = strokesSig()
     const mySeq = ++seq.current
     setStatus('AI가 보고 있습니다.')
     const res = await recognizeDrawing(strokes, keyword)
-    if (mySeq !== seq.current) return
+    if (mySeq !== seq.current) return null
     if (!res) {
       setStatus('인식 서버에 연결하지 못했습니다.')
-      return
+      return null
     }
+    recognizedSigRef.current = sig
+    rankRef.current = res.rank
     setGuesses(res.list.map(toKorean))
+    if (rollGarbageEgg(res, strokes.length)) {
+      setMoreGuesses([])
+      setEgg(true)
+      setRank(res.rank)
+      setStatus(EGG_TEXT)
+      return res.rank
+    }
+    setEgg(false)
     setMoreGuesses(toGuessItems(res.more))
     setRank(res.rank)
     if (res.rank > 0 && (bestRankRef.current === 0 || res.rank < bestRankRef.current)) {
@@ -55,6 +78,7 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
       sound.playAiRecognized(res.rank)
     }
     setStatus(res.rank ? `${keyword.ko}(으)로 ${res.rank}순위 인식했습니다.` : `${toKorean(res.list[0])}(으)로 보고 있습니다.`)
+    return res.rank
   }
 
   const pad = useDrawingPad({
@@ -62,7 +86,10 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
     height: CANVAS_H,
     enabled: report === null,
     onStrokeEnd: (t, pencilCount) => {
-      if (t === 'pencil' || pencilCount === 0) runRecognition()
+      // 연필 획이든 지우개로 지운 것이든 그림이 바뀌면 AI가 다시 본다
+      void t
+      void pencilCount
+      runRecognition()
     },
   })
   const { canvasRef, hasDrawn } = pad
@@ -72,10 +99,18 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
     if (hasDrawn && startedAt === null && !report) setStartedAt(Date.now())
   }, [hasDrawn, startedAt, report])
 
-  const judge = (left: number) => {
-    if (!canvasRef.current || report) return
+  /** 채점: 누른 순간의 남은 시간으로, 마지막 획의 인식까지 기다린 순위로 */
+  const judge = async (left: number) => {
+    if (!canvasRef.current || report || finishingRef.current) return
+    finishingRef.current = true
     pad.stopDrawing()
-    setReport(evaluateDrawing(canvasRef.current, left, rankRef.current, TURN_SEC, pad.recognitionStrokes()))
+    let r = rankRef.current
+    if (pad.recognitionStrokes().length && recognizedSigRef.current !== strokesSig()) {
+      setStatus('AI가 마지막 획까지 확인하고 있습니다.')
+      r = (await runRecognition()) ?? rankRef.current
+    }
+    finishingRef.current = false
+    if (canvasRef.current) setReport(evaluateDrawing(canvasRef.current, left, r, TURN_SEC, pad.recognitionStrokes()))
   }
 
   useEffect(() => {
@@ -110,6 +145,7 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
     seq.current++
     setGuesses([])
     setMoreGuesses([])
+    setEgg(false)
     setRank(0)
     bestRankRef.current = 0
     setStatus('캔버스를 비웠습니다.')
@@ -123,6 +159,7 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
     seq.current++
     setGuesses([])
     setMoreGuesses([])
+    setEgg(false)
     setRank(0)
     bestRankRef.current = 0
     setStartedAt(null)
@@ -207,7 +244,7 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
           <Panel className="p-4 2xl:p-5 flex-1 min-h-0 flex flex-col overflow-hidden">
             <Label>AI 판정</Label>
             <p className="shrink-0 font-display text-lg 2xl:text-xl leading-snug mt-2 min-h-[2.5rem]">{status}</p>
-            <GuessBoard items={moreGuesses} target={rank > 0 ? keyword.ko : null} waiting="그리면 AI가 떠올린 것이 쌓입니다" />
+            <GuessBoard items={moreGuesses} target={rank > 0 ? keyword.ko : null} waiting={egg ? '' : '그리면 AI가 떠올린 것이 쌓입니다'} />
           </Panel>
         </div>
       </div>

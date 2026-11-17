@@ -32,6 +32,8 @@ export interface Recognition {
   rank: number
   /** 화면에 보여 줄 더 긴 후보 목록 (list 로 시작하고 그 밖에 떠올린 것이 이어진다. 채점에는 쓰지 않는다) */
   more: string[]
+  /** AI가 갈피를 못 잡았는지: 돌려 본 방향마다 1~3위 후보가 하나도 겹치지 않는다 (진짜 알아볼 수 없는 그림) */
+  confused: boolean
 }
 
 /** 화면에 보여 줄 후보 수 (한글로 바꾼 뒤 겹치는 것을 빼면 조금 줄 수 있다) */
@@ -103,46 +105,39 @@ function extractGrid16(strokes: number[][][]): Float32Array | null {
   return grid
 }
 
-function matchFriendDataset(grid: Float32Array, kw: KeywordMap): Recognition {
+/** 친구 손그림 유사도 (영문 라벨 → 코사인 유사도), 높은 순 */
+function friendSimilarities(grid: Float32Array): { en: string; score: number }[] {
   const scores: { en: string; score: number }[] = []
-  const targetEn = normEn(kw.en)
-
   for (const [cat, data] of Object.entries(friendSignatures)) {
-    const targetGrid = (data as any).grid as number[]
+    const targetGrid = (data as { grid: number[] }).grid
     let dot = 0
-    for (let i = 0; i < 256; i++) {
-      dot += grid[i] * targetGrid[i]
-    }
+    for (let i = 0; i < 256; i++) dot += grid[i] * targetGrid[i]
     scores.push({ en: cat, score: dot })
   }
-
-  scores.sort((a, b) => b.score - a.score)
-  const top5 = scores.slice(0, 5).map(s => s.en)
-
-  let rank = 0
-  for (let i = 0; i < scores.length; i++) {
-    if (normEn(scores[i].en) === targetEn || toKorean(scores[i].en) === kw.ko) {
-      // 0.40 이상 유사도일 때 인식 성공으로 판정
-      if (scores[i].score >= 0.40) {
-        rank = i < 5 ? i + 1 : 0
-      }
-      break
-    }
-  }
-
-  return { list: top5, rank, more: scores.slice(0, MORE_MAX).map(s => s.en) }
+  return scores.sort((a, b) => b.score - a.score)
 }
 
-export async function recognizeDrawing(strokes: number[][][], kw: KeywordMap): Promise<Recognition | null> {
-  // 1. 친구들 손그림 기반 로컬 AI 모델 매칭 (초고속 오프라인 추론)
-  let friendResult: Recognition | null = null
-  const grid = extractGrid16(strokes)
-  if (grid) {
-    friendResult = matchFriendDataset(grid, kw)
-  }
+// ── 앙상블 비율: Quick, Draw! 95% + 친구 손그림 5% ─────────────────────────────
+// 두 점수를 0~1로 맞춘 뒤 가중합으로 순위를 다시 매긴다. 친구 손그림은 비슷한 후보끼리 순서를 살짝 바꾸는 정도로만 쓴다.
+const GOOGLE_WEIGHT = 0.95
+const FRIEND_WEIGHT = 0.05
+/** Quick, Draw! 후보를 방향마다 몇 위까지 볼지 */
+const GOOGLE_DEPTH = 10
+/** 똑바로 그린 그림을 가장 믿고, 돌려 본 결과는 조금 덜 믿는다 (눕혀 그린 그림 구제용) */
+const ANGLE_WEIGHT = [1, 0.85, 0.85, 0.85]
+/** 친구 손그림은 이 유사도 이상일 때만 의미 있는 후보로 본다 */
+const FRIEND_MIN_SIM = 0.4
+/** 마구 그은 낙서가 흔히 몰리는 범주 (이스터에그 판정용) */
+const SCRIBBLE_LABELS = new Set(['camouflage', 'squiggle', 'hurricane', 'tornado', 'bush', 'blackberry', 'zigzag', 'scribble', 'garden'].map(normEn))
 
-  // 2. 구글 Quick, Draw! 온라인 API 호출 (병행 앙상블)
-  let googleResult: Recognition | null = null
+export async function recognizeDrawing(strokes: number[][][], kw: KeywordMap): Promise<Recognition | null> {
+  // 1. 친구 손그림 유사도 (오프라인, 즉시)
+  const grid = extractGrid16(strokes)
+  const friends = grid ? friendSimilarities(grid) : []
+
+  // 2. Quick, Draw! 온라인 인식 (0°/90°/180°/270°)
+  let google: Map<string, number> | null = null
+  let confused = false
   // 네트워크가 멈추면 fetch 가 끝나지 않아 AI 차례·협동 채점이 영원히 기다린다. 제한 시간을 둔다
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), GOOGLE_TIMEOUT_MS)
@@ -161,26 +156,20 @@ export async function recognizeDrawing(strokes: number[][][], kw: KeywordMap): P
       }),
     })
     const data = await res.json()
-    const deep: string[][] = (data?.[1] ?? []).map((r: unknown[]) => (r?.[1] as string[]) ?? [])
-    const lists = deep.map(l => l.slice(0, 5))
+    const lists: string[][] = (data?.[1] ?? []).map((r: unknown[]) => ((r?.[1] as string[]) ?? []).slice(0, GOOGLE_DEPTH))
     if (lists.some(l => l.length)) {
-      const best = new Map<string, { rank: number; angle: number }>()
-      lists.forEach((l, a) => l.forEach((g, i) => {
-        const cur = best.get(g)
-        if (!cur || i + 1 < cur.rank) best.set(g, { rank: i + 1, angle: a })
-      }))
-      const target = [...best.keys()].find(g => isTarget(g, kw))
-      const rank = target ? best.get(target)!.rank : 0
-      const list = [...best.entries()]
-        .filter(([g]) => g !== target)
-        .sort(([, a], [, b]) => a.rank - b.rank || a.angle - b.angle)
-        .map(([g]) => g)
-      if (target) list.splice(rank - 1, 0, target)
-      // 화면용 긴 목록: 방향별 6위 아래 후보까지 순위대로 섞는다
-      const deeper = new Map<string, number>()
-      deep.forEach(l => l.forEach((g, i) => deeper.set(g, Math.min(deeper.get(g) ?? Infinity, i))))
-      const rest = [...deeper.entries()].sort((a, b) => a[1] - b[1]).map(([g]) => g)
-      googleResult = { list: list.slice(0, 5), rank, more: mergeLabels(list.slice(0, 5), rest) }
+      // 방향마다 1~3위를 모아 두 방향 이상에서 나온 후보가 하나도 없으면 '갈피를 못 잡음'
+      const seen = new Map<string, number>()
+      lists.forEach(l => new Set(l.slice(0, 3)).forEach(g => seen.set(g, (seen.get(g) ?? 0) + 1)))
+      confused = lists.filter(l => l.length).length >= 3 && ![...seen.values()].some(n => n >= 2)
+      // 순위 점수: 1위 1, 2위 1/2, 3위 1/3 ... 에 방향 가중치를 곱하고, 방향 중 가장 좋은 값을 쓴다
+      google = new Map()
+      lists.forEach((l, a) =>
+        l.forEach((g, i) => {
+          const sc = (ANGLE_WEIGHT[a] ?? 0.85) / (i + 1)
+          if (sc > (google!.get(g) ?? 0)) google!.set(g, sc)
+        }),
+      )
     }
   } catch {
     // 온라인 API 실패 시(인터넷 없음/오프라인/시간 초과)
@@ -188,33 +177,35 @@ export async function recognizeDrawing(strokes: number[][][], kw: KeywordMap): P
     clearTimeout(timeoutId)
   }
 
-  // 3. 앙상블: 실제 정답을 맞힌 쪽(더 높은 순위)의 후보 목록을 우선 사용하고, rank 와 목록 인덱스가 항상 1:1 일치하도록 보장
-  if (friendResult && googleResult) {
-    const preferFriend =
-      friendResult.rank > 0 && (googleResult.rank === 0 || friendResult.rank < googleResult.rank)
-    const primary = preferFriend ? friendResult.list : googleResult.list
-    const secondary = preferFriend ? googleResult.list : friendResult.list
-    const [primaryMore, secondaryMore] = preferFriend ? [friendResult.more, googleResult.more] : [googleResult.more, friendResult.more]
+  if (!google && !friends.length) return null
 
-    const mergedList: string[] = []
-    const seen = new Set<string>()
-    for (const item of [...primary, ...secondary]) {
-      const key = normEn(item)
-      if (!seen.has(key)) {
-        seen.add(key)
-        mergedList.push(item)
-        if (mergedList.length >= 5) break
-      }
+  // 친구 점수 0~1: 가장 비슷한 것 1, 기준 유사도 아래는 0
+  const top = friends[0]?.score ?? 0
+  const friendScore = new Map<string, { label: string; s: number }>()
+  if (top > FRIEND_MIN_SIM) {
+    for (const f of friends.slice(0, MORE_MAX)) {
+      const s = (f.score - FRIEND_MIN_SIM) / (top - FRIEND_MIN_SIM)
+      if (s > 0) friendScore.set(normEn(f.en), { label: f.en, s })
     }
-
-    const targetIdx = mergedList.findIndex(g => isTarget(g, kw))
-    return { list: mergedList, rank: targetIdx >= 0 ? targetIdx + 1 : 0, more: mergeLabels(mergedList, primaryMore, secondaryMore) }
   }
 
-  if (friendResult && friendResult.rank > 0) {
-    const targetIdx = friendResult.list.findIndex(g => isTarget(g, kw))
-    return { list: friendResult.list, rank: targetIdx >= 0 ? targetIdx + 1 : 0, more: friendResult.more }
+  // 3. 가중합으로 다시 순위를 매긴다. 인터넷이 안 되면 친구 손그림만으로 판정한다
+  const fused = new Map<string, { label: string; score: number; g: number }>()
+  if (google) {
+    google.forEach((g, label) => fused.set(normEn(label), { label, score: GOOGLE_WEIGHT * g, g }))
+    friendScore.forEach(({ label, s }, key) => {
+      const cur = fused.get(key)
+      if (cur) cur.score += FRIEND_WEIGHT * s
+      else fused.set(key, { label, score: FRIEND_WEIGHT * s, g: 0 })
+    })
+  } else {
+    friendScore.forEach(({ label, s }, key) => fused.set(key, { label, score: s, g: 0 }))
   }
 
-  return googleResult || (friendResult ? { list: friendResult.list, rank: 0, more: friendResult.more } : null)
+  const ranked = [...fused.values()].sort((a, b) => b.score - a.score || b.g - a.g).map(v => v.label)
+  const list = ranked.slice(0, 5)
+  const idx = list.findIndex(g => isTarget(g, kw))
+  // 낙서를 마구 그으면 Quick, Draw! 는 이런 '낙서 같은' 범주로 몰아 버린다. 1~3위 중 둘 이상이 여기면 알아볼 수 없는 그림
+  const scribbly = list.slice(0, 3).filter(g => SCRIBBLE_LABELS.has(normEn(g))).length >= 2
+  return { list, rank: idx >= 0 ? idx + 1 : 0, more: mergeLabels(ranked), confused: idx < 0 && (confused || scribbly) }
 }

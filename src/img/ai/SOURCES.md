@@ -8,6 +8,10 @@ CC BY / CC BY-SA 사진을 변환한 그림은 같은 조건(저작자 표시, B
 (직접 만든 입체 도형, 또는 Google Quick, Draw! 공개 데이터셋(CC BY 4.0)의 사람 낙서를 연필 선화로).
 AI가 인식받을 때 쓰는 획도 같은 Quick, Draw! 데이터셋에서 고른 낙서입니다 (`src/constants/aiDoodles.json`).
 
+> 배경이 남았거나 물체가 잘린 그림은 `_rejected/` 폴더로 옮겨 게임에서 쓰지 않습니다 (출처 표는 그대로 둡니다).
+> 같은 제시어의 그림을 더 넣을 때는 `<제시어>--2.jpg`, `<제시어>--3.jpg` 처럼 이름을 붙이면 게임이 그중 하나를 무작위로 고릅니다.
+> 소묘(jpg)가 없는 제시어는 친구들이 그린 선화(`<제시어>.png`)를 대신 씁니다.
+
 | 제시어 | 원본 | 저작자 | 라이선스 |
 |---|---|---|---|
 | aircraft carrier | [Fleet_5_nations.jpg](https://commons.wikimedia.org/wiki/File:Fleet_5_nations.jpg) | U.S. Navy/PH3 Alta I. Cutler | Public domain |
@@ -112,7 +116,6 @@ AI가 인식받을 때 쓰는 획도 같은 Quick, Draw! 데이터셋에서 고�
 | eye | [Human_eye_with_blood_vessels.jpg](https://commons.wikimedia.org/wiki/File:Human_eye_with_blood_vessels.jpg) | ROTFLOLEB | CC BY-SA 3.0 |
 | eyeglasses | [Glasses black.jpg](https://commons.wikimedia.org/wiki/File:Glasses_black.jpg) | عدنان حليم | CC BY-SA 4.0 |
 | face | [Isolated Face.jpg](https://commons.wikimedia.org/wiki/File:Isolated_Face.jpg) | Barry Langdon-Lassagne | CC BY 3.0 |
-| fan | [Fan MET DP281097.jpg](https://commons.wikimedia.org/wiki/File:Fan_MET_DP281097.jpg) | George Barbier | CC0 |
 | feather | [Ostrich Feather Duster.jpg](https://commons.wikimedia.org/wiki/File:Ostrich_Feather_Duster.jpg) | freebie.photography | CC BY 3.0 |
 | fence | [Westtown.jpg](https://commons.wikimedia.org/wiki/File:Westtown.jpg) | 알 수 없음 | Public domain |
 | finger | [Human_fingers_both_sides_2.jpg](https://commons.wikimedia.org/wiki/File:Human_fingers_both_sides_2.jpg) | Sciencia58 | CC BY-SA 4.0 |
@@ -272,3 +275,114 @@ AI가 인식받을 때 쓰는 획도 같은 Quick, Draw! 데이터셋에서 고�
 | wine glass | [Wine Glass MET 180800.jpg](https://commons.wikimedia.org/wiki/File:Wine_Glass_MET_180800.jpg) | New England Glass Company | CC0 |
 | yoga | [Shiva_Bangalore.jpg](https://commons.wikimedia.org/wiki/File:Shiva_Bangalore.jpg) | Kalyan Kumar | CC BY-SA 2.0 |
 | zebra | [Plains_Zebra_Equus_quagga_cropped.jpg](https://commons.wikimedia.org/wiki/File:Plains_Zebra_Equus_quagga_cropped.jpg) | Muhammad Mahdi Karim | GFDL 1.2 |
+| scissors (`scissors--2.jpg`) | [Ciseaux.png](https://commons.wikimedia.org/wiki/File:Ciseaux.png) | Doudoulolita | CC BY-SA 3.0 |
+| scissors (`scissors--3.jpg`) | [13-01-02-inventur-wmde-blitz-42.jpg](https://commons.wikimedia.org/wiki/File:13-01-02-inventur-wmde-blitz-42.jpg) | Ralf Roletschek (talk) - Infos über Fahrräder auf fahrradmonteur.de | CC BY-SA 3.0 |
+| scissors (`scissors--4.jpg`) | [Embroidering scissors.jpg](https://commons.wikimedia.org/wiki/File:Embroidering_scissors.jpg) | Clément Bucco-Lechat | CC BY-SA 3.0 |
+| ambulance (`ambulance.jpg`) | [Joustra-fourgon-Peugeot-J7-ambulance-gyro-bleu-tole-friction-21cm-1975.jpg](https://commons.wikimedia.org/wiki/File:Joustra-fourgon-Peugeot-J7-ambulance-gyro-bleu-tole-friction-21cm-1975.jpg) | Rundvald | CC BY-SA 4.0 |
+| apple (`apple.jpg`) | [Apple15112024.jpg](https://commons.wikimedia.org/wiki/File:Apple15112024.jpg) | mali maeder | CC0 |
+| apple (`apple--2.jpg`) | [Blue-disgusting-apple.jpg](https://commons.wikimedia.org/wiki/File:Blue-disgusting-apple.jpg) | YlliBrekcedoD | CC0 |
+| apple (`apple--3.jpg`) | [A for apple.jpg](https://commons.wikimedia.org/wiki/File:A_for_apple.jpg) | 3df | CC BY-SA 4.0 |
+| basketball (`basketball.jpg`) | [2022-05-04 ALBA Berlin gegen Jobstairs Gießen 46ers (Basketball-Bundesliga 2021-22) by Sandro Halank–100.jpg](https://commons.wikimedia.org/wiki/File:2022-05-04_ALBA_Berlin_gegen_Jobstairs_Gie%C3%9Fen_46ers_(Basketball-Bundesliga_2021-22)_by_Sandro_Halank%E2%80%93100.jpg) | Sandro Halank, Wikimedia Commons | CC BY-SA 4.0 |
+| bathtub (`bathtub.jpg`) | [Objectes de la Sala Secà i Muntanya (26584789513).jpg](https://commons.wikimedia.org/wiki/File:Objectes_de_la_Sala_Sec%C3%A0_i_Muntanya_(26584789513).jpg) | Museu Valencià d'Etnologia from València, España | CC BY-SA 2.0 |
+| bear (`bear.jpg`) | [Bear crop.jpg](https://commons.wikimedia.org/wiki/File:Bear_crop.jpg) | Robert F. Tobler | CC BY-SA 4.0 |
+| bed (`bed.jpg`) | [Handcrafted custom floating walnut bed.jpg](https://commons.wikimedia.org/wiki/File:Handcrafted_custom_floating_walnut_bed.jpg) | MajestyWoodworks | CC BY 4.0 |
+| bench (`bench.jpg`) | [NFM.0000-08445 extended.jpg](https://commons.wikimedia.org/wiki/File:NFM.0000-08445_extended.jpg) | Unknown authorUnknown author | CC BY 4.0 |
+| blueberry (`blueberry.jpg`) | [Isolated Blueberries.jpg](https://commons.wikimedia.org/wiki/File:Isolated_Blueberries.jpg) | Foodie Factor | CC0 |
+| blueberry (`blueberry--2.jpg`) | [Fresh blueberries (49950742312).jpg](https://commons.wikimedia.org/wiki/File:Fresh_blueberries_(49950742312).jpg) | spurekar | CC BY 2.0 |
+| bowtie (`bowtie.jpg`) | [Bow tie.jpg](https://commons.wikimedia.org/wiki/File:Bow_tie.jpg) | David Ring | CC0 |
+| bowtie (`bowtie--2.jpg`) | [IMG Z9730.jpg](https://commons.wikimedia.org/wiki/File:IMG_Z9730.jpg) | Zuzzo | CC BY-SA 4.0 |
+| bowtie (`bowtie--3.jpg`) | [BOWTIE red velvet pretied clipon.JPG](https://commons.wikimedia.org/wiki/File:BOWTIE_red_velvet_pretied_clipon.JPG) | PJ McNally | CC BY-SA 3.0 |
+| bucket (`bucket.jpg`) | [Candy Corn in Halloween Pail (5076303633).jpg](https://commons.wikimedia.org/wiki/File:Candy_Corn_in_Halloween_Pail_(5076303633).jpg) | TheCulinaryGeek from Chicago, USA | CC BY 2.0 |
+| bulldozer (`bulldozer.jpg`) | [ТРАКТОР ТС-10 «Добрыня».jpg](https://commons.wikimedia.org/wiki/File:%D0%A2%D0%A0%D0%90%D0%9A%D0%A2%D0%9E%D0%A0_%D0%A2%D0%A1-10_%C2%AB%D0%94%D0%BE%D0%B1%D1%80%D1%8B%D0%BD%D1%8F%C2%BB.jpg) | avtomash.ru | CC BY 4.0 |
+| door (`door.jpg`) | [Doorcase MET 194816.jpg](https://commons.wikimedia.org/wiki/File:Doorcase_MET_194816.jpg) | Creator:Jean Antoine CuenotCreator:Giovanni Battista Borra | CC0 |
+| drums (`drums.jpg`) | [Bateriavoga.jpg](https://commons.wikimedia.org/wiki/File:Bateriavoga.jpg) | Daniiel Cardoso | CC BY-SA 4.0 |
+| dumbbell (`dumbbell.jpg`) | [Gym-dynamic-gradient.png](https://commons.wikimedia.org/wiki/File:Gym-dynamic-gradient.png) | Vijay Verma | CC0 |
+| dumbbell (`dumbbell--2.jpg`) | [Gym-dynamic-premium.png](https://commons.wikimedia.org/wiki/File:Gym-dynamic-premium.png) | Vijay Verma | CC0 |
+| dumbbell (`dumbbell--3.jpg`) | [Hanteln (45784000422).jpg](https://commons.wikimedia.org/wiki/File:Hanteln_(45784000422).jpg) | Tim Reckmann from Hamm, Deutschland | CC BY 2.0 |
+| fork (`fork.jpg`) | [Einweg-holzgabel draufsicht-rueckseite 2022.jpg](https://commons.wikimedia.org/wiki/File:Einweg-holzgabel_draufsicht-rueckseite_2022.jpg) | VSchagow | CC BY-SA 4.0 |
+| frying pan (`frying_pan.jpg`) | [Tea infuser pendulum pan clock.jpg](https://commons.wikimedia.org/wiki/File:Tea_infuser_pendulum_pan_clock.jpg) | Ioannis Protonotarios | CC BY-SA 4.0 |
+| giraffe (`giraffe.jpg`) | [500px photo (188690013).jpeg](https://commons.wikimedia.org/wiki/File:500px_photo_(188690013).jpeg) | Chi King | CC BY 3.0 |
+| giraffe (`giraffe--2.jpg`) | [Giraffe (7612990972).jpg](https://commons.wikimedia.org/wiki/File:Giraffe_(7612990972).jpg) | Sadie Hart | CC BY 2.0 |
+| keyboard (`keyboard.jpg`) | [Intel iPDS internal keyboard key switches.jpg](https://commons.wikimedia.org/wiki/File:Intel_iPDS_internal_keyboard_key_switches.jpg) | Snuci | Public domain |
+| keyboard (`keyboard--2.jpg`) | [Juki DATUM FK 201 - Front.jpg](https://commons.wikimedia.org/wiki/File:Juki_DATUM_FK_201_-_Front.jpg) | 002 | Public domain |
+| keyboard (`keyboard--3.jpg`) | [Albert computer keyboard front.JPG](https://commons.wikimedia.org/wiki/File:Albert_computer_keyboard_front.JPG) | Snuci | Public domain |
+| light bulb (`light_bulb.jpg`) | [Early tungsten light bulb.jpg](https://commons.wikimedia.org/wiki/File:Early_tungsten_light_bulb.jpg) | A. D. Page | Public domain |
+| paint can (`paint_can.jpg`) | [System interiörmatt, svart kulör - XLM.42609c.jpg](https://commons.wikimedia.org/wiki/File:System_interi%C3%B6rmatt,_svart_kul%C3%B6r_-_XLM.42609c.jpg) | Länsmuseet Gävleborg | CC BY-SA 4.0 |
+| paint can (`paint_can--2.jpg`) | [Touch Up Paint Mazda Motor Corporation (51880826903).jpg](https://commons.wikimedia.org/wiki/File:Touch_Up_Paint_Mazda_Motor_Corporation_(51880826903).jpg) | Joost J. Bakker IJmuiden | CC BY 2.0 |
+| paintbrush (`paintbrush.jpg`) | [Pinceau mural bleu (01).jpg](https://commons.wikimedia.org/wiki/File:Pinceau_mural_bleu_(01).jpg) | M0tty | CC BY-SA 4.0 |
+| paintbrush (`paintbrush--2.jpg`) | [Pinceau mural bleu (02).jpg](https://commons.wikimedia.org/wiki/File:Pinceau_mural_bleu_(02).jpg) | M0tty | CC BY-SA 4.0 |
+| paintbrush (`paintbrush--3.jpg`) | [WikiGrenier - Pinceaux 02.jpg](https://commons.wikimedia.org/wiki/File:WikiGrenier_-_Pinceaux_02.jpg) | Pierre-Yves Beaudouin | CC BY-SA 4.0 |
+| peanut (`peanut.jpg`) | [Arachis hypogaea MHNT.BOT.2020.2.20.jpg](https://commons.wikimedia.org/wiki/File:Arachis_hypogaea_MHNT.BOT.2020.2.20.jpg) | Roger Culos | CC BY-SA 4.0 |
+| peanut (`peanut--2.jpg`) | [Arachis hypogaea 15-p.bot-ara.hypo-0007.jpg](https://commons.wikimedia.org/wiki/File:Arachis_hypogaea_15-p.bot-ara.hypo-0007.jpg) | Ayotte, Gilles, 1948- | CC BY-SA 4.0 |
+| penguin (`penguin.jpg`) | [Galapagos Penguin (Spheniscus mendiculus).jpg](https://commons.wikimedia.org/wiki/File:Galapagos_Penguin_(Spheniscus_mendiculus).jpg) | Gregory "Slobirdr" Smith | CC BY-SA 2.0 |
+| rifle (`rifle.jpg`) | [GForce Saddlehorn Mare’s Leg (55018406975).jpg](https://commons.wikimedia.org/wiki/File:GForce_Saddlehorn_Mare%E2%80%99s_Leg_(55018406975).jpg) | Mitch Barrie | CC BY-SA 4.0 |
+| rifle (`rifle--2.jpg`) | [Henry Long Ranger (55018090881).jpg](https://commons.wikimedia.org/wiki/File:Henry_Long_Ranger_(55018090881).jpg) | Mitch Barrie | CC BY-SA 4.0 |
+| shark (`shark.jpg`) | [Paragaleus longicaudata by fahad.png](https://commons.wikimedia.org/wiki/File:Paragaleus_longicaudata_by_fahad.png) | The Great Mule of Eupatoria | CC BY 4.0 |
+| shark (`shark--2.jpg`) | [Squalus griffini (DOTkamina).jpg](https://commons.wikimedia.org/wiki/File:Squalus_griffini_(DOTkamina).jpg) | Dotkamina | CC BY-SA 4.0 |
+| shark (`shark--3.jpg`) | [Ptychodus.jpg](https://commons.wikimedia.org/wiki/File:Ptychodus.jpg) | Corbin Rainbolt | CC BY 4.0 |
+| sheep (`sheep.jpg`) | [Mammaliatheirva00figu orig 0293.png](https://commons.wikimedia.org/wiki/File:Mammaliatheirva00figu_orig_0293.png) | Albin Mesnel, Édouard Riou, Edward Blyth, Alphonse de Neuville | Public domain |
+| snorkel (`snorkel.jpg`) | [Breeze.jpg](https://commons.wikimedia.org/wiki/File:Breeze.jpg) | Alexander Kurtchitski | CC BY-SA 3.0 |
+| spoon (`spoon.jpg`) | [1080 Cuchara sopera, Estocolmo Suecia.jpg](https://commons.wikimedia.org/wiki/File:1080_Cuchara_sopera,_Estocolmo_Suecia.jpg) | Museo Soumaya | CC BY-SA 4.0 |
+| spoon (`spoon--2.jpg`) | [1145 Cuchara doble, Europa.jpg](https://commons.wikimedia.org/wiki/File:1145_Cuchara_doble,_Europa.jpg) | Museo Soumaya | CC BY-SA 4.0 |
+| alarm clock (`alarm_clock--2.jpg`) | [Budzik czechosłowackiej marki PRIM.jpg](https://commons.wikimedia.org/wiki/File:Budzik_czechos%C5%82owackiej_marki_PRIM.jpg) | Przemek.Zborowski | CC BY-SA 4.0 |
+| alarm clock (`alarm_clock--3.jpg`) | [Jaren 80 – 2009-046-097 (9624421500).jpg](https://commons.wikimedia.org/wiki/File:Jaren_80_%E2%80%93_2009-046-097_(9624421500).jpg) | Studio Alijn | CC0 |
+| axe (`axe--2.jpg`) | [Squadratora.jpg](https://commons.wikimedia.org/wiki/File:Squadratora.jpg) | Westernelba | CC BY-SA 4.0 |
+| axe (`axe--3.jpg`) | [Axe, British, with a rubber handle, 20000 Volt.JPG](https://commons.wikimedia.org/wiki/File:Axe,_British,_with_a_rubber_handle,_20000_Volt.JPG) | KingaNBM | CC BY-SA 4.0 |
+| backpack (`backpack--2.jpg`) | [Hadiah Respati WMID Tas Wikimedia.png](https://commons.wikimedia.org/wiki/File:Hadiah_Respati_WMID_Tas_Wikimedia.png) | Dwi Satria Utama for WMID | CC BY-SA 4.0 |
+| backpack (`backpack--3.jpg`) | [HighKey Backpack.png](https://commons.wikimedia.org/wiki/File:HighKey_Backpack.png) | Trent Huss | CC BY-SA 4.0 |
+| backpack (`backpack--4.jpg`) | [JAM SESSION NAVY.jpg](https://commons.wikimedia.org/wiki/File:JAM_SESSION_NAVY.jpg) | CupangBetta | CC BY-SA 4.0 |
+| banana (`banana--2.jpg`) | [Bananas Bananen Protein.jpg](https://commons.wikimedia.org/wiki/File:Bananas_Bananen_Protein.jpg) | Serife Gerenschier | CC BY-SA 4.0 |
+| banana (`banana--3.jpg`) | [Bananas (48585009292).jpg](https://commons.wikimedia.org/wiki/File:Bananas_(48585009292).jpg) | Brett Jordan | CC BY 2.0 |
+| banana (`banana--4.jpg`) | [Banana - Q503.jpg](https://commons.wikimedia.org/wiki/File:Banana_-_Q503.jpg) | Sandra Fauconnier | CC0 |
+| baseball bat (`baseball_bat--2.jpg`) | [Tony Gwynn's Bat-1.JPG](https://commons.wikimedia.org/wiki/File:Tony_Gwynn%27s_Bat-1.JPG) | Tony the Marine (talk) | CC BY-SA 3.0 |
+| baseball bat (`baseball_bat--3.jpg`) | [Tony Gwynn's Bat-2.JPG](https://commons.wikimedia.org/wiki/File:Tony_Gwynn%27s_Bat-2.JPG) | Tony the Marine (talk) | CC BY-SA 3.0 |
+| bat (`bat--2.jpg`) | [Flying-Fox-Bat.jpg](https://commons.wikimedia.org/wiki/File:Flying-Fox-Bat.jpg) | Source: Hasitha Tudugalle Derivative: User:MathKnight | CC BY 4.0 |
+| bat (`bat--3.jpg`) | [Tadarida teniotis - 5491.jpg](https://commons.wikimedia.org/wiki/File:Tadarida_teniotis_-_5491.jpg) | Amada44 | CC BY-SA 3.0 |
+| bat (`bat--4.jpg`) | [Tadarida teniotis - MUSE-01.jpg](https://commons.wikimedia.org/wiki/File:Tadarida_teniotis_-_MUSE-01.jpg) | Matteo De Stefano/MUSE | CC BY-SA 3.0 |
+| binoculars (`binoculars--2.jpg`) | [Alpen binoculars, 2010.jpg](https://commons.wikimedia.org/wiki/File:Alpen_binoculars,_2010.jpg) | Dana Beveridge | CC BY 2.0 |
+| binoculars (`binoculars--3.jpg`) | [Binocular Eschenbach Derby Compact 8x40 Ww.jpg](https://commons.wikimedia.org/wiki/File:Binocular_Eschenbach_Derby_Compact_8x40_Ww.jpg) | Isiwal | CC BY-SA 4.0 |
+| binoculars (`binoculars--4.jpg`) | [Binocular with 8x magnification and 42 mm lens diameter.jpg](https://commons.wikimedia.org/wiki/File:Binocular_with_8x_magnification_and_42_mm_lens_diameter.jpg) | Andreas Klehr | CC BY-SA 4.0 |
+| birthday cake (`birthday_cake--2.jpg`) | [-Cake -birthday celebration -Friends -Fun -memoryful moment -Delicious.jpg](https://commons.wikimedia.org/wiki/File:-Cake_-birthday_celebration_-Friends_-Fun_-memoryful_moment_-Delicious.jpg) | Govindaraj Mahalakshmi | CC BY-SA 4.0 |
+| birthday cake (`birthday_cake--3.jpg`) | [Flower box cake (7758124558).jpg](https://commons.wikimedia.org/wiki/File:Flower_box_cake_(7758124558).jpg) | mags | CC BY-SA 2.0 |
+| boomerang (`boomerang--2.jpg`) | [Hooked Boomerang Oc1908,0620.76.jpg](https://commons.wikimedia.org/wiki/File:Hooked_Boomerang_Oc1908,0620.76.jpg) | The Trustees of the British Museum | CC BY-SA 4.0 |
+| boomerang (`boomerang--3.jpg`) | [Returning Boomerang Oc1839,0620.13.jpg](https://commons.wikimedia.org/wiki/File:Returning_Boomerang_Oc1839,0620.13.jpg) | The Trustees of the British Museum | CC BY-SA 4.0 |
+| broccoli (`broccoli--2.jpg`) | [Brocolli Studio.jpg](https://commons.wikimedia.org/wiki/File:Brocolli_Studio.jpg) | JJ Harrison (https://www.jjharrison.com.au/) | CC BY-SA 2.5 |
+| broccoli (`broccoli--3.jpg`) | [Good broccoli Deal!.jpg](https://commons.wikimedia.org/wiki/File:Good_broccoli_Deal!.jpg) | Renee Comet (Photographer) | Public domain |
+| broccoli (`broccoli--4.jpg`) | [ബ്രോക്കോളി.jpg](https://commons.wikimedia.org/wiki/File:%E0%B4%AC%E0%B5%8D%E0%B4%B0%E0%B5%8B%E0%B4%95%E0%B5%8D%E0%B4%95%E0%B5%8B%E0%B4%B3%E0%B4%BF.jpg) | Sadik Khalid at Malayalam Wikipedia. | Public domain |
+| calculator (`calculator--2.jpg`) | [Numworks calculator.png](https://commons.wikimedia.org/wiki/File:Numworks_calculator.png) | Samename92 | CC BY 4.0 |
+| calculator (`calculator--3.jpg`) | [BUFFALO BTK-UD01 PC CALCULATOR.jpg](https://commons.wikimedia.org/wiki/File:BUFFALO_BTK-UD01_PC_CALCULATOR.jpg) | 軍事用懐中電灯 | CC BY 4.0 |
+| calculator (`calculator--4.jpg`) | [Vintage Kosmos 1 Biorhythm Computer And Calculator, 8 Digits, Green Fluorescent, Calculates A Person's Three Biorhythm Cycles (Physical, Emotional, and Intellectual), Made In Japan, Circa 1977 (23428675179).jpg](https://commons.wikimedia.org/wiki/File:Vintage_Kosmos_1_Biorhythm_Computer_And_Calculator,_8_Digits,_Green_Fluorescent,_Calculates_A_Person%27s_Three_Biorhythm_Cycles_(Physical,_Emotional,_and_Intellectual),_Made_In_Japan,_Circa_1977_(23428675179).jpg) | Joe Haupt from USA | CC BY-SA 2.0 |
+| t-shirt (`t-shirt.jpg`) | [Camiseta-sonrie.jpg](https://commons.wikimedia.org/wiki/File:Camiseta-sonrie.jpg) | Impacto33 | CC BY-SA 4.0 |
+| wine bottle (`wine_bottle--2.jpg`) | [CUVEE CENTENAIRE.jpg](https://commons.wikimedia.org/wiki/File:CUVEE_CENTENAIRE.jpg) | Lepasselys | CC BY-SA 4.0 |
+| wine bottle (`wine_bottle--3.jpg`) | [Fles, groen (wijnfles) (Bourgondisch) - A71ZFL - 60000755 - RCE.jpg](https://commons.wikimedia.org/wiki/File:Fles,_groen_(wijnfles)_(Bourgondisch)_-_A71ZFL_-_60000755_-_RCE.jpg) | Unknown authorUnknown author | CC BY-SA 4.0 |
+| wine bottle (`wine_bottle--4.jpg`) | [Château Haut-Bailly 1981.jpg](https://commons.wikimedia.org/wiki/File:Ch%C3%A2teau_Haut-Bailly_1981.jpg) | Geographer | CC BY-SA 4.0 |
+| zebra (`zebra.jpg`) | [Zebra species (ENG).png](https://commons.wikimedia.org/wiki/File:Zebra_species_(ENG).png) | Lydekker, RichardGriffini, AchilleHayes, Matthew Horace | Public domain |
+| book (`book--2.jpg`) | [Bibliotheca Bible.jpg](https://commons.wikimedia.org/wiki/File:Bibliotheca_Bible.jpg) | FactDoubleCheck | CC BY-SA 4.0 |
+| book (`book--3.jpg`) | [Agenda-aniv-2026.jpg](https://commons.wikimedia.org/wiki/File:Agenda-aniv-2026.jpg) | Mmartino | CC BY-SA 4.0 |
+| bracelet (`bracelet--2.jpg`) | [45345345435gfdg.jpg](https://commons.wikimedia.org/wiki/File:45345345435gfdg.jpg) | Canismaring | CC BY-SA 4.0 |
+| bracelet (`bracelet--3.jpg`) | [Bracelet Beldi Contemporain.jpg](https://commons.wikimedia.org/wiki/File:Bracelet_Beldi_Contemporain.jpg) | Mounier et Bouvard | CC BY-SA 4.0 |
+| broom (`broom--2.jpg`) | [Miotła 001q.JPG](https://commons.wikimedia.org/wiki/File:Miot%C5%82a_001q.JPG) | Mielon | CC BY-SA 3.0 |
+| broom (`broom--3.jpg`) | [Escoba de paja.jpg](https://commons.wikimedia.org/wiki/File:Escoba_de_paja.jpg) | Grupo Colombio | CC BY-SA 3.0 |
+| cake (`cake--2.jpg`) | [Brown Cake in pan.jpg](https://commons.wikimedia.org/wiki/File:Brown_Cake_in_pan.jpg) | Miansari66 | CC0 |
+| camera (`camera--2.jpg`) | [2026-04-05 17-34-26 (B,R8,S4)-Edit.jpg](https://commons.wikimedia.org/wiki/File:2026-04-05_17-34-26_(B,R8,S4)-Edit.jpg) | Moderatepotato | CC BY 4.0 |
+| camera (`camera--3.jpg`) | [2026-04-05 17-35-13 (B,R8,S4)-Edit.jpg](https://commons.wikimedia.org/wiki/File:2026-04-05_17-35-13_(B,R8,S4)-Edit.jpg) | Moderatepotato | CC BY 4.0 |
+| camera (`camera--4.jpg`) | [Boumsell Longchamp.jpg](https://commons.wikimedia.org/wiki/File:Boumsell_Longchamp.jpg) | Bertrand Labévue | CC0 |
+| carrot (`carrot--2.jpg`) | [Carrot-fb.jpg](https://commons.wikimedia.org/wiki/File:Carrot-fb.jpg) | Collegestudent33 | CC BY-SA 4.0 |
+| carrot (`carrot--3.jpg`) | [Dark carrot.jpg](https://commons.wikimedia.org/wiki/File:Dark_carrot.jpg) | Tiia Monto | CC BY-SA 4.0 |
+| ceiling fan (`ceiling_fan--2.jpg`) | [Fan 2024.jpg](https://commons.wikimedia.org/wiki/File:Fan_2024.jpg) | Muthukumaran Esakkiappan | CC BY-SA 4.0 |
+| cell phone (`cell_phone--2.jpg`) | [Coin phone green.png](https://commons.wikimedia.org/wiki/File:Coin_phone_green.png) | Quickfins | CC0 |
+| cell phone (`cell_phone--3.jpg`) | [75 MOVIL.jpg](https://commons.wikimedia.org/wiki/File:75_MOVIL.jpg) | Museuvalenciaetnologia | CC BY-SA 4.0 |
+| cello (`cello--2.jpg`) | [Violoncelo Suggia, MN Musica.jpg](https://commons.wikimedia.org/wiki/File:Violoncelo_Suggia,_MN_Musica.jpg) | Museu Nacional da Música | CC0 |
+| chair (`chair--2.jpg`) | [ALTO1.jpg](https://commons.wikimedia.org/wiki/File:ALTO1.jpg) | Viliam Chlebo | CC0 |
+| chair (`chair--3.jpg`) | [AngosturaChair designed by Maximilian Jencquel.jpg](https://commons.wikimedia.org/wiki/File:AngosturaChair_designed_by_Maximilian_Jencquel.jpg) | Hlnabs | CC BY-SA 4.0 |
+| chair (`chair--4.jpg`) | [Bally Doppelschalenstuhl S 20241015 1.jpg](https://commons.wikimedia.org/wiki/File:Bally_Doppelschalenstuhl_S_20241015_1.jpg) | GirsMontani | CC0 |
+| clarinet (`clarinet--2.jpg`) | [Albert-Klarinette.png](https://commons.wikimedia.org/wiki/File:Albert-Klarinette.png) | Christian Ledermann | CC BY-SA 4.0 |
+| clarinet (`clarinet--3.jpg`) | [C-klarinette-lauriol-bordeaux (1).png](https://commons.wikimedia.org/wiki/File:C-klarinette-lauriol-bordeaux_(1).png) | Christian Ledermann | CC BY-SA 4.0 |
+| clock (`clock--2.jpg`) | [Art Deco Shelf Clock Amboina Wood.jpg](https://commons.wikimedia.org/wiki/File:Art_Deco_Shelf_Clock_Amboina_Wood.jpg) | PStettner | CC BY-SA 4.0 |
+| clock (`clock--3.jpg`) | [Clock, mantel (51361135060).jpg](https://commons.wikimedia.org/wiki/File:Clock,_mantel_(51361135060).jpg) | Auckland Museum Collections from Auckland, Aotearoa New Zealand | CC BY 2.0 |
+| coffee cup (`coffee_cup--2.jpg`) | [Coffee (4247810969).jpg](https://commons.wikimedia.org/wiki/File:Coffee_(4247810969).jpg) | Carlos Lopes from Uberaba-MG, Brasil | CC BY 2.0 |
+| coffee cup (`coffee_cup--3.jpg`) | [Bulletproof Coffee IMG 20170806 1755.jpg](https://commons.wikimedia.org/wiki/File:Bulletproof_Coffee_IMG_20170806_1755.jpg) | Hans Haase | CC BY-SA 4.0 |
+| coffee cup (`coffee_cup--4.jpg`) | [Annie Spratt 2016-03-24 (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Annie_Spratt_2016-03-24_(Unsplash).jpg) | Annie Spratt anniespratt | CC0 |
+| couch (`couch--2.jpg`) | [Chaise Longue Confort Online.jpg](https://commons.wikimedia.org/wiki/File:Chaise_Longue_Confort_Online.jpg) | Confortonline | CC BY-SA 4.0 |
+| crown (`crown--2.jpg`) | [King 1st Suresh's crown.jpg](https://commons.wikimedia.org/wiki/File:King_1st_Suresh%27s_crown.jpg) | SURESH2006 | CC BY-SA 4.0 |
+| crown (`crown--3.jpg`) | [Couronne portée par Mlle George dans le rôle de Marie Tudor, 1173.jpg](https://commons.wikimedia.org/wiki/File:Couronne_port%C3%A9e_par_Mlle_George_dans_le_r%C3%B4le_de_Marie_Tudor,_1173.jpg) | Anonyme, orfèvre | CC0 |

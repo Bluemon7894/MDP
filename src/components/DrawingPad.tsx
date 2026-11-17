@@ -83,7 +83,10 @@ export function useDrawingPad({
   const pencilStrokesRef = useRef<number[][][]>([])
   const currentStrokeRef = useRef<{ x: number[]; y: number[]; t: number[] }>({ x: [], y: [], t: [] })
   const strokeStartRef = useRef(0)
-  const undoRef = useRef<{ image: ImageData; pencil: number }[]>([])
+  // 되돌리기용: 캔버스 그림 + 그때의 연필 획 목록 (지우개가 획을 잘라 내므로 개수가 아니라 목록 자체를 저장)
+  const undoRef = useRef<{ image: ImageData; strokes: number[][][] }[]>([])
+  // 이번 지우개 질로 연필 획이 지워졌는지
+  const erasedRef = useRef(false)
   const onStrokeEndRef = useRef(onStrokeEnd)
   onStrokeEndRef.current = onStrokeEnd
 
@@ -106,9 +109,41 @@ export function useDrawingPad({
 
   const pushUndo = () => {
     const ctx = canvasRef.current!.getContext('2d')!
-    undoRef.current.push({ image: ctx.getImageData(0, 0, width, height), pencil: pencilStrokesRef.current.length })
+    undoRef.current.push({ image: ctx.getImageData(0, 0, width, height), strokes: pencilStrokesRef.current.slice() })
     if (undoRef.current.length > 12) undoRef.current.shift()
     setUndoCount(undoRef.current.length)
+  }
+
+  // 지우개가 지나간 자리의 연필 점을 AI 인식용 획에서도 지운다 (지운 선을 AI가 계속 보지 않게).
+  // 획 중간이 지워지면 두 획으로 나눈다
+  const eraseStrokes = (a: { x: number; y: number }, b: { x: number; y: number }, r: number) => {
+    const dx = b.x - a.x, dy = b.y - a.y
+    const len2 = dx * dx + dy * dy
+    const hit = (x: number, y: number) => {
+      const t = len2 ? Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / len2)) : 0
+      return Math.hypot(x - (a.x + dx * t), y - (a.y + dy * t)) <= r
+    }
+    let changed = false
+    const next: number[][][] = []
+    for (const [xs, ys, ts] of pencilStrokesRef.current) {
+      let run: number[][] = [[], [], []]
+      for (let i = 0; i < xs.length; i++) {
+        if (hit(xs[i], ys[i])) {
+          changed = true
+          if (run[0].length) next.push(run)
+          run = [[], [], []]
+        } else {
+          run[0].push(xs[i])
+          run[1].push(ys[i])
+          run[2].push(ts[i])
+        }
+      }
+      if (run[0].length) next.push(run)
+    }
+    if (changed) {
+      pencilStrokesRef.current = next
+      erasedRef.current = true
+    }
   }
 
   const paint = (from: { x: number; y: number }, to: { x: number; y: number }, pressure: number) => {
@@ -128,6 +163,7 @@ export function useDrawingPad({
     } else if (tool === 'eraser') {
       ctx.globalCompositeOperation = 'destination-out'
       ctx.lineWidth = size
+      eraseStrokes(from, to, size / 2 + 2)
       ctx.beginPath()
       ctx.moveTo(from.x, from.y)
       ctx.lineTo(to.x, to.y)
@@ -141,7 +177,8 @@ export function useDrawingPad({
     if (!enabled) return
     pushUndo()
     setDrawing(true)
-    setHasDrawn(true)
+    // 지우개질만으로는 '그렸다'로 치지 않는다
+    if (tool === 'pencil') setHasDrawn(true)
     const pos = getPos(e)
     last.current = pos
     try {
@@ -169,7 +206,16 @@ export function useDrawingPad({
     setDrawing(false)
     last.current = null
     const s = currentStrokeRef.current
-    if (tool === 'eraser' || s.x.length === 0) return
+    if (tool === 'eraser') {
+      // 연필 획을 지웠으면 남은 그림으로 AI가 다시 보게 한다
+      if (erasedRef.current) {
+        erasedRef.current = false
+        setHasDrawn(pencilStrokesRef.current.length > 0)
+        onStrokeEndRef.current?.(tool, pencilStrokesRef.current.length)
+      }
+      return
+    }
+    if (s.x.length === 0) return
     pencilStrokesRef.current.push([s.x, s.y, s.t])
     onStrokeEndRef.current?.(tool, pencilStrokesRef.current.length)
   }
@@ -180,7 +226,7 @@ export function useDrawingPad({
     setUndoCount(undoRef.current.length)
     if (!snap || !canvasRef.current) return false
     canvasRef.current.getContext('2d')!.putImageData(snap.image, 0, 0)
-    pencilStrokesRef.current = pencilStrokesRef.current.slice(0, snap.pencil)
+    pencilStrokesRef.current = snap.strokes
     setHasDrawn(pencilStrokesRef.current.length > 0)
     return true
   }

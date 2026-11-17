@@ -9,6 +9,7 @@ import { AdvancedAnalysisModal } from './Modals'
 import { Button, Label, Overlay, Panel, KeywordTitle } from './ui'
 import { INK, ToolBar, snapshotOf, useDrawingPad } from './DrawingPad'
 import { GuessBoard, toGuessItems } from './GuessBoard'
+import { EGG_TEXT, rollGarbageEgg } from '../utils/easterEgg'
 
 
 const CANVAS_W = 1200
@@ -58,6 +59,8 @@ export function ScreenGame({
   const [guesses, setGuesses] = useState<string[]>([])
   // AI 판정 칸을 채우는 긴 추론 키워드 목록 (한글)
   const [moreGuesses, setMoreGuesses] = useState<string[]>([])
+  // 깜짝 이스터에그: 알아볼 수 없는 그림에 아주 가끔 "뭘 그리신 거에요...?" 만 띄우고 후보를 비운다
+  const [egg, setEgg] = useState(false)
   const [rank, setRank] = useState(0)
   const rankRef = useRef(0)
   const bestRankRef = useRef(0)
@@ -72,7 +75,10 @@ export function ScreenGame({
     enabled: isMyTurn && analysisReport === null && !submitted,
     // 연필 획을 그을 때마다(연필이 없으면 명암 획으로) AI가 다시 본다
     onStrokeEnd: (t, pencilCount) => {
-      if (t === 'pencil' || pencilCount === 0) runRecognition()
+      // 연필 획이든 지우개로 지운 것이든 그림이 바뀌면 AI가 다시 본다
+      void t
+      void pencilCount
+      runRecognition()
     },
   })
   const { canvasRef, hasDrawn } = pad
@@ -103,6 +109,9 @@ export function ScreenGame({
     bestRankRef.current = 0
     setAiPenPos(null)
     recogSeq.current++
+    recognizedSigRef.current = null
+    finishingRef.current = false
+    setEgg(false)
 
     if (isAiPlayer) setStatusText('AI가 구도를 잡고 있습니다.')
     else if (isMyTurn) setStatusText('핵심 선 위주로 간결하게 특징을 표현해 보세요.')
@@ -185,23 +194,49 @@ export function ScreenGame({
     }
   }, [isAiPlayer, currentKeyword])
 
-  // 시간 초과: 그리던 화면에서만 채점 (마지막 인식 결과는 인정, 속도 점수는 0)
+  // 마지막으로 인식을 마친 그림 (획마다 점 수). 채점 직전에 지금 그림과 다르면 한 번 더 본다
+  const strokesSig = () => pad.recognitionStrokes().map(st => st[0].length).join(',')
+  const recognizedSigRef = useRef<string | null>(null)
+  const finishingRef = useRef(false)
+
+  /** 채점 직전: 마지막 획의 인식이 아직이면 끝까지 기다린 뒤의 순위를 돌려준다 */
+  const finalRank = async () => {
+    if (!pad.recognitionStrokes().length) return 0
+    if (recognizedSigRef.current === strokesSig()) return rankRef.current
+    setStatusText('AI가 마지막 획까지 확인하고 있습니다.')
+    await runRecognition()
+    return rankRef.current
+  }
+
+  /** 완성 버튼·시간 초과 공통: 누른 순간의 남은 시간으로, 마지막 그림까지 본 순위로 채점 */
+  const finish = async (left: number) => {
+    if (!canvasRef.current || analysisReport !== null || submitted || finishingRef.current) return
+    finishingRef.current = true
+    pad.stopDrawing()
+    const r = await finalRank()
+    finishingRef.current = false
+    if (!canvasRef.current) return
+    setAnalysisReport(evaluateDrawing(canvasRef.current, left, r, TURN_SEC, pad.recognitionStrokes()))
+  }
+
+  // 시간 초과: 그리던 화면에서만 채점 (속도 점수는 0)
   useEffect(() => {
     if (timeLeft === 0 && isMyTurn && !submitted && analysisReport === null && canvasRef.current) {
-      pad.stopDrawing()
       sound.playSubmit()
-      setAnalysisReport(evaluateDrawing(canvasRef.current, 0, rankRef.current, TURN_SEC, pad.recognitionStrokes()))
-      
+      finish(0)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft, isMyTurn, analysisReport, submitted])
 
   const runRecognition = async () => {
     const strokes = pad.recognitionStrokes()
     if (!strokes.length) {
       setRecognition(0, [])
-    bestRankRef.current = 0
+      bestRankRef.current = 0
+      recognizedSigRef.current = ''
       return
     }
+    const sig = strokesSig()
     const seq = ++recogSeq.current
     setStatusText('AI가 그림을 보고 있습니다.')
     const res = await recognizeDrawing(strokes, currentKeyword)
@@ -210,11 +245,20 @@ export function ScreenGame({
       setStatusText('인식 서버에 연결하지 못했습니다. 네트워크를 확인해 주세요.')
       return
     }
+    recognizedSigRef.current = sig
     const r = res.rank
     if (r > 0 && (bestRankRef.current === 0 || r < bestRankRef.current)) {
       bestRankRef.current = r
       sound.playAiRecognized(r)
     }
+    // 이스터에그는 화면 표시만 바꾼다 (채점 순위는 그대로)
+    if (rollGarbageEgg(res, strokes.length)) {
+      setRecognition(r, res.list, [])
+      setEgg(true)
+      setStatusText(EGG_TEXT)
+      return
+    }
+    setEgg(false)
     setRecognition(r, res.list, res.more)
     
     setStatusText(r ? `${r}순위로 알아봤습니다. 핵심 선을 다듬거나 바로 완성하세요.` : `${toKorean(res.list[0])}(으)로 보고 있습니다.`)
@@ -230,8 +274,7 @@ export function ScreenGame({
   }
 
   const submit = () => {
-    if (!canvasRef.current || analysisReport !== null || submitted) return
-    setAnalysisReport(evaluateDrawing(canvasRef.current, timeLeft, rankRef.current, TURN_SEC, pad.recognitionStrokes()))
+    finish(timeLeft)
   }
 
   const curTime = isNaN(timeLeft) ? 0 : timeLeft
@@ -398,7 +441,7 @@ export function ScreenGame({
             <GuessBoard
               items={moreGuesses}
               target={rank > 0 ? currentKeyword.ko : null}
-              waiting={isAiPlayer ? 'AI가 그리는 중입니다' : isMyTurn ? '그리면 AI가 떠올린 것이 쌓입니다' : `${drawerName}님이 그리는 중입니다`}
+              waiting={egg ? '' : isAiPlayer ? 'AI가 그리는 중입니다' : isMyTurn ? '그리면 AI가 떠올린 것이 쌓입니다' : `${drawerName}님이 그리는 중입니다`}
               dim={!isMyTurn && !isAiPlayer}
             />
           </Panel>

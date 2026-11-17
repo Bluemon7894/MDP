@@ -9,15 +9,30 @@ import { getAiShape, CanvasPt } from '../constants/aiDrawings'
 //  완성본을 먼저 오프스크린에 만들고, 붓질 마스크로 조금씩 드러내며 '그리는' 연출을 한다.
 // ─────────────────────────────────────────────────────────────────────────────
 
+// src/img/ai 바로 아래 그림만 쓴다 (배경이 남았거나 잘린 그림은 src/img/ai/_rejected/ 로 빼 두었다)
 const REFERENCE_IMAGES = import.meta.glob('../img/ai/*.{png,jpg,jpeg,webp}', {
   query: '?url',
   import: 'default',
 }) as Record<string, () => Promise<string>>
 
+// 파일 이름 규칙: <제시어>.jpg, 같은 제시어의 다른 그림은 <제시어>--2.jpg, <제시어>--3.jpg ...
+//  · jpg/jpeg/webp = 사진을 연필 소묘로 바꾼 그림 (우선 사용, 여러 장이면 무작위)
+//  · png = 친구들이 그린 선화 (소묘가 없을 때만). apple.png 는 직접 받은 연필 소묘라 소묘로 친다
+const PENCIL_PNG = new Set(['apple'])
+const REFERENCE_INDEX = Object.entries(REFERENCE_IMAGES).map(([path, load]) => {
+  const file = path.split('/').pop()!.toLowerCase()
+  const ext = file.split('.').pop()!
+  const key = file.replace(/\.\w+$/, '').replace(/--\d+$/, '')
+  return { key, load, pencil: ext !== 'png' || PENCIL_PNG.has(key) }
+})
+
 const referenceFor = async (en: string): Promise<string | undefined> => {
   const key = en.toLowerCase().trim().replace(/\s+/g, '_')
-  const hit = Object.entries(REFERENCE_IMAGES).find(([path]) => path.split('/').pop()!.replace(/\.\w+$/, '').toLowerCase() === key)
-  return hit ? await hit[1]() : undefined
+  const all = REFERENCE_INDEX.filter(r => r.key === key)
+  const pencil = all.filter(r => r.pencil)
+  const pool = pencil.length ? pencil : all
+  if (!pool.length) return undefined
+  return await pool[Math.floor(Math.random() * pool.length)].load()
 }
 
 export interface RevealStroke { pts: CanvasPt[]; width: number; alpha: number }
