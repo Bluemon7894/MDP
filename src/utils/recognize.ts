@@ -157,21 +157,31 @@ export async function recognizeDrawing(strokes: number[][][], kw: KeywordMap): P
     // 온라인 API 실패 시(인터넷 없음/오프라인)
   }
 
-  // 3. 앙상블: 친구들 모델과 구글 모델 중 더 높은(유리한) 순위를 채택!
+  // 3. 앙상블: 실제 정답을 맞힌 쪽(더 높은 순위)의 후보 목록을 우선 사용하고, rank 와 목록 인덱스가 항상 1:1 일치하도록 보장
   if (friendResult && googleResult) {
-    let bestRank = 0
-    if (friendResult.rank > 0 && googleResult.rank > 0) {
-      bestRank = Math.min(friendResult.rank, googleResult.rank)
-    } else {
-      bestRank = Math.max(friendResult.rank, googleResult.rank)
+    const preferFriend =
+      friendResult.rank > 0 && (googleResult.rank === 0 || friendResult.rank < googleResult.rank)
+    const primary = preferFriend ? friendResult.list : googleResult.list
+    const secondary = preferFriend ? googleResult.list : friendResult.list
+
+    const mergedList: string[] = []
+    const seen = new Set<string>()
+    for (const item of [...primary, ...secondary]) {
+      const key = normEn(item)
+      if (!seen.has(key)) {
+        seen.add(key)
+        mergedList.push(item)
+        if (mergedList.length >= 5) break
+      }
     }
 
-    const mergedList = [...new Set([...friendResult.list, ...googleResult.list])].slice(0, 5)
-    return { list: mergedList, rank: bestRank }
+    const targetIdx = mergedList.findIndex(g => isTarget(g, kw))
+    return { list: mergedList, rank: targetIdx >= 0 ? targetIdx + 1 : 0 }
   }
 
   if (friendResult && friendResult.rank > 0) {
-    return { list: friendResult.list, rank: friendResult.rank }
+    const targetIdx = friendResult.list.findIndex(g => isTarget(g, kw))
+    return { list: friendResult.list, rank: targetIdx >= 0 ? targetIdx + 1 : 0 }
   }
 
   return googleResult || (friendResult ? { list: friendResult.list, rank: 0 } : null)

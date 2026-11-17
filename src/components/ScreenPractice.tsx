@@ -33,7 +33,7 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
     if (!strokes.length) {
       setGuesses([])
       setRank(0)
-      bestRankRef.current = 0
+    bestRankRef.current = 0
       return
     }
     const mySeq = ++seq.current
@@ -106,6 +106,7 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
     seq.current++
     setGuesses([])
     setRank(0)
+    bestRankRef.current = 0
     setStatus('캔버스를 비웠습니다.')
   }
 
@@ -117,6 +118,7 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
     seq.current++
     setGuesses([])
     setRank(0)
+    bestRankRef.current = 0
     setStartedAt(null)
     setTimeLeft(TURN_SEC)
     setStatus(`이번에는 ${k.ko}을(를) 그려 보세요. 첫 획부터 20초가 흐릅니다.`)
