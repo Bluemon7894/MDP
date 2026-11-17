@@ -10,15 +10,14 @@ import { getAiShape, CanvasPt } from '../constants/aiDrawings'
 // ─────────────────────────────────────────────────────────────────────────────
 
 const REFERENCE_IMAGES = import.meta.glob('../img/ai/*.{png,jpg,jpeg,webp}', {
-  eager: true,
   query: '?url',
   import: 'default',
-}) as Record<string, string>
+}) as Record<string, () => Promise<string>>
 
-const referenceFor = (en: string) => {
+const referenceFor = async (en: string): Promise<string | undefined> => {
   const key = en.toLowerCase().trim().replace(/\s+/g, '_')
   const hit = Object.entries(REFERENCE_IMAGES).find(([path]) => path.split('/').pop()!.replace(/\.\w+$/, '').toLowerCase() === key)
-  return hit?.[1]
+  return hit ? await hit[1]() : undefined
 }
 
 export interface RevealStroke { pts: CanvasPt[]; width: number; alpha: number }
@@ -341,7 +340,7 @@ function planStrokes(art: HTMLCanvasElement): RevealStroke[][] {
 
 export async function createAiArtwork(en: string, W: number, H: number): Promise<AiArtwork> {
   const shape = getAiShape(en, W, H)
-  const ref = referenceFor(en)
+  const ref = await referenceFor(en)
   // 사진 소묘 → 직접 만든 입체 도형 → 사람 낙서 선화 순으로 있는 것을 쓴다
   const fallback = () => (shape.fills.length ? renderProcedural(shape.fills, shape.lines, W, H) : renderDoodle(shape.doodleLines, W, H))
   let art: HTMLCanvasElement

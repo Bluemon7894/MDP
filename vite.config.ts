@@ -43,6 +43,7 @@ react(),
         ignored: [
           '**/.figma/**',
           '**/data/**',
+          '**/candy_dispenser/**',
 ],
       },
     },
