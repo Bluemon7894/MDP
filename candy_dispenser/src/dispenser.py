@@ -40,7 +40,9 @@ HALF_STEP_SEQ = [
 # Total half-steps for 1 full 360-degree rotation of 28BYJ-48 output shaft
 # (Internal motor 64 steps * 64 gear reduction = 4096 half-steps/rev)
 STEPS_PER_REV = 4096
-DEFAULT_STEP_DELAY = 0.0018  # 1.8ms per half-step (~13 RPM, high torque)
+STEPS_HALF_REV = 2048
+DEFAULT_STEP_DELAY = 0.0015  # 1.5ms per half-step (reliable max speed)
+SHAKE_STEP_DELAY = 0.0012    # 1.2ms per half-step for snappy shake
 
 class CandyDispenser:
     """Controls single candy dispensing operations with safety power-down."""
@@ -84,36 +86,57 @@ class CandyDispenser:
         if self.mock:
             logger.debug("[SIMULATION] Coils released (0, 0, 0, 0) - Motor cool.")
 
-    def step_motor(self, steps, direction=1):
+    def step_motor(self, steps, direction=1, delay=None, release=True):
         """
         Rotates the motor by a given number of half-steps.
         direction: 1 for clockwise (forward), -1 for counter-clockwise (reverse).
         """
         seq_len = len(HALF_STEP_SEQ)
         step_idx = 0 if direction == 1 else seq_len - 1
+        step_delay = self.step_delay if delay is None else delay
 
         for i in range(abs(steps)):
             state = HALF_STEP_SEQ[step_idx]
             self._set_pins(state)
-            time.sleep(self.step_delay)
+            time.sleep(step_delay)
             step_idx = (step_idx + direction) % seq_len
 
-        # Always de-energize coils immediately after movement completes!
-        self.release_coils()
+        if release:
+            # Always de-energize coils immediately after movement completes!
+            self.release_coils()
 
     def dispense_single(self, steps_per_dispense=STEPS_PER_REV):
         """
-        Dispenses exactly 1 candy by rotating the drum pocket to the dump chute.
-        Executes anti-jam wiggle if needed and cuts coil power upon completion.
+        Dispenses exactly 1 candy:
+          1. Rotate 180 deg reverse (-2048 steps) to dump chute
+          2. Shake 3 times (+110 / -110 steps) so candy drops cleanly
+          3. Continue 180 deg reverse (-2048 steps) back to top home position
         """
-        logger.info(f"Starting single dispense cycle ({steps_per_dispense} half-steps)...")
+        logger.info("Starting single dispense cycle (180 rev + shake + 180 return)...")
         t_start = time.time()
-        
-        # Forward rotation
-        self.step_motor(steps_per_dispense, direction=1)
-        
+
+        try:
+            self.step_motor(STEPS_HALF_REV, direction=-1, delay=self.step_delay, release=False)
+            for _ in range(3):
+                self.step_motor(110, direction=1, delay=SHAKE_STEP_DELAY, release=False)
+                self.step_motor(110, direction=-1, delay=SHAKE_STEP_DELAY, release=False)
+                time.sleep(0.05)
+            time.sleep(0.2)
+            self.step_motor(STEPS_HALF_REV, direction=-1, delay=self.step_delay, release=False)
+        finally:
+            self.release_coils()
+
         elapsed = time.time() - t_start
         logger.info(f"Dispense complete in {elapsed:.2f}s. Coils de-energized.")
+        return True
+
+    def dispense_many(self, count=1):
+        count = max(1, min(5, int(count)))
+        for i in range(count):
+            logger.info(f"Dispensing candy {i + 1}/{count}...")
+            self.dispense_single()
+            if i + 1 < count:
+                time.sleep(0.35)
         return True
 
     def anti_jam_wiggle(self, angle_degrees=20):

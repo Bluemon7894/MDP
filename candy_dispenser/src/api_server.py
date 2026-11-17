@@ -7,7 +7,10 @@ Zero extra dependencies (uses Python standard library http.server).
 
 import sys
 import json
+import queue
+import threading
 import logging
+from urllib.parse import urlparse, parse_qs
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from dispenser import CandyDispenser
 
@@ -15,6 +18,21 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("DispenserAPI")
 
 dispenser_instance = None
+job_queue = queue.Queue()
+
+
+def worker_loop():
+    while True:
+        count, reason = job_queue.get()
+        try:
+            logger.info(f"Executing dispense job: count={count}, reason={reason}")
+            dispenser_instance.dispense_many(count=count)
+        except Exception as e:
+            logger.error(f"Dispense worker failed: {e}")
+            dispenser_instance.release_coils()
+        finally:
+            job_queue.task_done()
+
 
 class DispenserHTTPHandler(BaseHTTPRequestHandler):
     def _send_json(self, status_code, data):
@@ -30,27 +48,52 @@ class DispenserHTTPHandler(BaseHTTPRequestHandler):
         self._send_json(200, {"status": "ok"})
 
     def do_GET(self):
-        if self.path == "/status":
+        parsed = urlparse(self.path)
+        if parsed.path == "/status":
             self._send_json(200, {
                 "device": "Retro Candy Dispenser",
                 "status": "ready",
                 "motor": "28BYJ-48",
                 "driver": "ULN2003",
-                "mock_mode": dispenser_instance.mock
+                "mock_mode": dispenser_instance.mock,
+                "queued": job_queue.qsize(),
             })
-        elif self.path == "/dispense":
-            logger.info("GET /dispense received.")
-            dispenser_instance.dispense_single()
-            self._send_json(200, {"status": "dispensed", "count": 1})
+        elif parsed.path == "/dispense":
+            qs = parse_qs(parsed.query)
+            try:
+                count = max(1, min(5, int(qs.get("count", ["1"])[0])))
+            except ValueError:
+                count = 1
+            logger.info(f"GET /dispense received (count={count}).")
+            job_queue.put((count, "http_get"))
+            self._send_json(200, {"status": "queued", "count": count})
         else:
             self._send_json(404, {"error": "Not Found. Use /dispense or /status"})
 
     def do_POST(self):
-        if self.path == "/dispense":
-            logger.info("POST /dispense received.")
-            dispenser_instance.dispense_single()
-            self._send_json(200, {"status": "dispensed", "count": 1})
-        elif self.path == "/wiggle":
+        parsed = urlparse(self.path)
+        if parsed.path == "/dispense":
+            length = int(self.headers.get("Content-Length", "0") or "0")
+            body = {}
+            if length > 0:
+                try:
+                    raw = self.rfile.read(length).decode("utf-8")
+                    body = json.loads(raw) if raw else {}
+                except Exception:
+                    body = {}
+            try:
+                count = int(body.get("count", 1))
+            except (TypeError, ValueError):
+                count = 1
+            if count <= 0:
+                self._send_json(200, {"status": "skipped", "count": 0})
+                return
+            count = max(1, min(5, count))
+            reason = str(body.get("reason", "victory"))
+            logger.info(f"POST /dispense received (count={count}, reason={reason}).")
+            job_queue.put((count, reason))
+            self._send_json(200, {"status": "queued", "count": count, "reason": reason})
+        elif parsed.path == "/wiggle":
             logger.info("POST /wiggle received.")
             dispenser_instance.anti_jam_wiggle()
             self._send_json(200, {"status": "wiggled"})
@@ -58,12 +101,13 @@ class DispenserHTTPHandler(BaseHTTPRequestHandler):
             self._send_json(404, {"error": "Not Found"})
 
     def log_message(self, format, *args):
-        # Clean logging
         logger.info(f"{self.address_string()} - {format % args}")
+
 
 def run_server(port=8080, mock=False):
     global dispenser_instance
     dispenser_instance = CandyDispenser(mock=mock)
+    threading.Thread(target=worker_loop, daemon=True).start()
     server_address = ("0.0.0.0", port)
     httpd = HTTPServer(server_address, DispenserHTTPHandler)
     logger.info(f"Dispenser API Server running at http://0.0.0.0:{port}/")
@@ -76,6 +120,7 @@ def run_server(port=8080, mock=False):
     finally:
         dispenser_instance.cleanup()
         httpd.server_close()
+
 
 if __name__ == "__main__":
     port = 8080
