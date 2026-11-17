@@ -23,6 +23,7 @@ export function HangulKeyboard({
   const strokesRef = useRef<number[][][]>([])
   const currentStrokeRef = useRef<{ x: number[]; y: number[]; t: number[] }>({ x: [], y: [], t: [] })
   const strokeStartTimeRef = useRef<number>(0)
+  const recogSeqRef = useRef(0)
   // 이름이 길어지면 글자를 줄여 한 줄에 들어가게
   const nameSize = assembledName.length <= 8 ? 'text-6xl' : assembledName.length <= 14 ? 'text-5xl' : 'text-4xl'
 
@@ -80,6 +81,8 @@ export function HangulKeyboard({
   // Google Handwriting 한글 필기인식 호출
   const recognizeHandwrittenName = async () => {
     if (strokesRef.current.length === 0) return
+    // 획마다 요청이 나가므로, 늦게 도착한 예전 응답(또는 '다시 쓰기' 전 응답)이 이름을 덮지 않게 한다
+    const seq = ++recogSeqRef.current
     setIsRecognizing(true)
     try {
       const res = await fetch("https://inputtools.google.com/request?ime=handwriting&app=mobilesearch", {
@@ -98,6 +101,7 @@ export function HangulKeyboard({
         })
       })
       const data = await res.json()
+      if (seq !== recogSeqRef.current) return
       if (data?.[1]?.[0]?.[1]) {
         const topList: string[] = data[1][0][1].slice(0, 5)
         setCandidates(topList)
@@ -107,7 +111,7 @@ export function HangulKeyboard({
     } catch (e) {
       console.error(e)
     } finally {
-      setIsRecognizing(false)
+      if (seq === recogSeqRef.current) setIsRecognizing(false)
     }
   }
 
@@ -116,6 +120,8 @@ export function HangulKeyboard({
     if (!canvasRef.current) return
     canvasRef.current.getContext('2d')!.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
     strokesRef.current = []
+    recogSeqRef.current++
+    setIsRecognizing(false)
     setHasDrawn(false)
     setAssembledName('')
     setCandidates([])

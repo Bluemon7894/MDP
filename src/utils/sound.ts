@@ -7,13 +7,22 @@
 
 import menuBgmUrl from '../assets/audio/Buoyant Town Loop.mp3'
 import gameBgmUrl from '../assets/audio/Bouncy Puzzle Groove.mp3'
+import bossBgmUrl from '../assets/audio/boss.mp3'
 
-export type BgmTrack = 'none' | 'menu' | 'game'
+export type BgmTrack = 'none' | 'menu' | 'game' | 'boss'
 
 const BGM_VOLUME: Record<Exclude<BgmTrack, 'none'>, number> = {
   menu: 0.36,
   game: 0.32,
+  boss: 0.4,
 }
+
+const BGM_URL: Record<Exclude<BgmTrack, 'none'>, string> = {
+  menu: menuBgmUrl,
+  game: gameBgmUrl,
+  boss: bossBgmUrl,
+}
+const BGM_TRACKS = ['menu', 'game', 'boss'] as const
 
 function isScreenBFromLocation(): boolean {
   if (typeof window === 'undefined') return false
@@ -89,7 +98,7 @@ class SoundManager {
   private getAudio(track: Exclude<BgmTrack, 'none'>): HTMLAudioElement {
     let el = this.audios[track]
     if (!el) {
-      el = new Audio(track === 'menu' ? menuBgmUrl : gameBgmUrl)
+      el = new Audio(BGM_URL[track])
       el.loop = true
       el.preload = 'auto'
       el.volume = 0
@@ -129,7 +138,7 @@ class SoundManager {
   }
 
   private stopAllBgmImmediate() {
-    ;(['menu', 'game'] as const).forEach(t => {
+    ;BGM_TRACKS.forEach(t => {
       this.clearFade(t)
       const el = this.audios[t]
       if (el) {
@@ -146,7 +155,7 @@ class SoundManager {
     const target: BgmTrack = this.screenAllowed && this.bgmEnabled ? this.desiredTrack : 'none'
 
     // Fade out any track that shouldn't be playing
-    ;(['menu', 'game'] as const).forEach(t => {
+    ;BGM_TRACKS.forEach(t => {
       if (t !== target && this.audios[t] && !this.audios[t]!.paused) {
         this.fadeTo(t, 0, 260, true)
       }
@@ -248,6 +257,15 @@ class SoundManager {
 
     osc.start(start)
     osc.stop(start + duration + 0.01)
+  }
+
+  /** 홈 화면 로봇을 찔렀을 때: 연타할수록 높고 급해지는 경고음 (level 1~) */
+  public playRobotPoke(level: number) {
+    const ctx = this.canPlaySfx()
+    if (!ctx) return
+    const f = 420 + level * 90
+    this.tone(ctx, { freq: f, endFreq: f * 1.35, type: 'square', duration: 0.07, volume: 0.07 })
+    if (level >= 6) this.tone(ctx, { freq: f * 1.5, type: 'square', delay: 0.09, duration: 0.05, volume: 0.06 })
   }
 
   /** 일반 버튼 클릭음 (통통 튀는 따뜻한 팝) */

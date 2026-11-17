@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { ScreenTarget, CabAState, CabBState, ActivePlayer, RankItem, KeywordMap, CustomModalState, BestDrawing, GameMode } from './types'
 import { pickRandomKeywords } from './constants/quickdraw'
 import { getCachedRankings, fetchRankings, submitRanking, deleteRanking } from './utils/storage'
-import { bestScoreIn } from './utils/rankingCore'
+import { bestScoreIn, MAX_ENTRIES } from './utils/rankingCore'
 import { GalleryItem, postGallery } from './utils/gallery'
 import { postArcade, onArcade, onRankingsChanged, ArcadeMessage } from './utils/arcadeSync'
 import { dispenseCandy } from './utils/candyDispenser'
@@ -65,6 +65,11 @@ export default function App() {
   }, [screenMode])
 
   useEffect(() => {
+    // AI와 대결은 보스전: 보스 등장 연출(카운트다운)부터 보스 브금을 깐다
+    if (screenMode !== 'b' && isVsAi && (countdown !== null || cabA === 'inGame')) {
+      sound.setBgmTrack(customModal.isOpen ? 'none' : 'boss')
+      return
+    }
     if (screenMode === 'b' || countdown !== null) {
       sound.setBgmTrack('none')
       return
@@ -78,11 +83,23 @@ export default function App() {
       return
     }
     sound.setBgmTrack('menu')
-  }, [screenMode, cabA, countdown, customModal.isOpen])
+  }, [screenMode, cabA, countdown, customModal.isOpen, isVsAi])
 
   const gameFinishedRef = useRef(false)
   const p1ReadyRef = useRef(false)
   const p2ReadyRef = useRef(false)
+  // 이번 게임의 카운트다운을 이미 시작했는지 (두 화면이 서로 시작 신호를 보내도 한 번만 센다)
+  const countdownStartedRef = useRef(false)
+  const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const stopCountdown = () => {
+    if (countdownTimerRef.current !== null) clearInterval(countdownTimerRef.current)
+    countdownTimerRef.current = null
+  }
+  // 새 게임 준비(모드 선택·처음으로)마다 시작 신호를 다시 받을 수 있게 한다
+  const resetStartGuard = () => {
+    stopCountdown()
+    countdownStartedRef.current = false
+  }
   // 게임 중 플레이어별로 가장 점수가 높았던 그림 (랭킹 카드에 띄운다)
   const bestRef = useRef<Record<ActivePlayer, BestDrawing | null>>({ '1P': null, '2P': null })
 
@@ -131,9 +148,9 @@ export default function App() {
   }, [])
 
   // 화면 사이 메시지 (서버 중계라 Chrome 계정·브라우저가 달라도 이어진다)
-  useEffect(() => {
-    const handleMessage = ({ type, payload }: ArcadeMessage) => {
-            if (type === 'REQUEST_2P_MODE' || type === 'INIT_2P_MODE') {
+  // 구독은 한 번만 하고, 메시지는 항상 최신 렌더의 처리기로 넘긴다 (이름·모드 상태가 옛 값으로 굳지 않게)
+  const handleMessage = ({ type, payload }: ArcadeMessage) => {
+      if (type === 'REQUEST_2P_MODE' || type === 'INIT_2P_MODE') {
         setIsTwoPlayer(true)
         setIsVsAi(false)
         setIsCoop(!!payload.coop)
@@ -143,17 +160,18 @@ export default function App() {
         p1ReadyRef.current = false
         p2ReadyRef.current = false
         gameFinishedRef.current = false
+        resetStartGuard()
       } else if (type === 'P1_READY_TRIGGER') {
         setP1Name(payload.p1Name)
         p1ReadyRef.current = true
-        if (p2ReadyRef.current) {
+        if (p2ReadyRef.current && !countdownStartedRef.current) {
           postArcade('TRIGGER_START', { p1Name: payload.p1Name, p2Name })
           startSimultaneousCountdown()
         }
       } else if (type === 'P2_READY_TRIGGER') {
         setP2Name(payload.p2Name)
         p2ReadyRef.current = true
-        if (p1ReadyRef.current) {
+        if (p1ReadyRef.current && !countdownStartedRef.current) {
           postArcade('TRIGGER_START', { p1Name, p2Name: payload.p2Name })
           startSimultaneousCountdown()
         }
@@ -162,6 +180,9 @@ export default function App() {
         setP2Name(payload.p2Name)
         startSimultaneousCountdown()
       } else if (type === 'START_GAME_NOW') {
+        // 상대 화면이 먼저 시작했으면 이 화면의 카운트다운은 거기서 끝낸다
+        stopCountdown()
+        countdownStartedRef.current = true
         setCabA('inGame')
         setCabB(payload.isTwoPlayer ? 'inGame' : 'leaderboard')
         setCountdown(null)
@@ -197,6 +218,7 @@ export default function App() {
         setCustomModal({ isOpen: true, type: 'alert', title: payload.title, message: payload.message, onConfirm: () => home() })
       } else if (type === 'GOTO_HOME') {
         pendingGalleryRef.current = []
+        resetStartGuard()
         setCabA('idle')
         setCabB('leaderboard')
         setIsTwoPlayer(false)
@@ -208,10 +230,11 @@ export default function App() {
         p1ReadyRef.current = false
         p2ReadyRef.current = false
       }
-    }
+  }
+  const handleMessageRef = useRef(handleMessage)
+  handleMessageRef.current = handleMessage
 
-    return onArcade(handleMessage)
-  }, [isTwoPlayer, activePlayer, p1Score, p2Score])
+  useEffect(() => onArcade(msg => handleMessageRef.current(msg)), [])
 
   // 랭킹은 서버에서 받아 오고, 다른 화면에서 바뀌면 서버가 알려 준다. 창을 다시 볼 때도 새로 읽는다
   useEffect(() => {
@@ -233,16 +256,19 @@ export default function App() {
   }, [])
 
   const startSimultaneousCountdown = () => {
+    if (countdownStartedRef.current) return
+    countdownStartedRef.current = true
     // AI 대결은 1P 화면에서만 진행하고 2P 화면은 랭킹을 계속 보여 준다
     const bothScreensPlay = isTwoPlayer && !isVsAi
     setCountdown(3)
     let c = 3
+    stopCountdown()
     const interval = setInterval(() => {
       c -= 1
       if (c >= 0) {
         setCountdown(c)
       } else {
-        clearInterval(interval)
+        stopCountdown()
         setCabA('inGame')
         setCabB(bothScreensPlay ? 'inGame' : 'leaderboard')
         setCountdown(null)
@@ -258,6 +284,7 @@ export default function App() {
         postArcade('START_GAME_NOW', { isTwoPlayer: bothScreensPlay })
       }
     }, 1000)
+    countdownTimerRef.current = interval
   }
 
   useEffect(() => {
@@ -277,7 +304,10 @@ export default function App() {
   const saveRecord = (name: string, score: number, mode: GameMode, player: ActivePlayer) => {
     const prevBest = bestScoreIn(rankings, name)
     const best = bestRef.current[player]
-    return { item: { name, score, mode, drawing: best?.drawing, keyword: best?.keyword }, prevBest, renewed: prevBest === null || score > prevBest }
+    // 명예의 전당(Top 10)에 처음 드는지: 자리가 남았거나 10위 이상 점수 (같은 점수면 최신 기록이 앞선다)
+    const lowest = rankings.length ? rankings[rankings.length - 1].score : 0
+    const entersTop = rankings.length < MAX_ENTRIES || score >= lowest
+    return { item: { name, score, mode, drawing: best?.drawing, keyword: best?.keyword }, prevBest, renewed: prevBest === null || score > prevBest, entersTop }
   }
 
   const submitRecords = async (records: ReturnType<typeof saveRecord>[]) => {
@@ -286,9 +316,11 @@ export default function App() {
     publishRankings(list)
   }
 
-  const recordNote = (name: string, r: { prevBest: number | null; renewed: boolean }) =>
+  const recordNote = (name: string, r: { prevBest: number | null; renewed: boolean; entersTop: boolean }) =>
     r.prevBest === null
-      ? `${name}님의 기록이 랭킹에 등록되었습니다.`
+      ? r.entersTop
+        ? `${name}님의 기록이 랭킹에 등록되었습니다.`
+        : `${name}님의 기록이 저장되었습니다. (명예의 전당 Top ${MAX_ENTRIES}에는 들지 못했습니다)`
       : r.renewed
         ? `${name}님의 최고 기록을 ${r.prevBest.toLocaleString()}점에서 갱신했습니다.`
         : `${name}님의 기존 최고 기록 ${r.prevBest.toLocaleString()}점이 유지됩니다.`
@@ -467,6 +499,7 @@ export default function App() {
   }
 
   const handleSelect1PMode = () => {
+    resetStartGuard()
     setIsTwoPlayer(false)
     setIsVsAi(false)
     setIsCoop(false)
@@ -475,7 +508,8 @@ export default function App() {
     gameFinishedRef.current = false
   }
 
-    const handleSelect2PMode = () => {
+  const handleSelect2PMode = () => {
+    resetStartGuard()
     const newKeywords = pickRandomKeywords(TOTAL_ROUNDS)
     setGameKeywords(newKeywords)
     setIsTwoPlayer(true)
@@ -491,6 +525,7 @@ export default function App() {
 
   // 인간 vs AI: 사람 이름을 받은 뒤 2P 자리에 AI를 앉히고 바로 시작
   const handleSelectVsAiMode = () => {
+    resetStartGuard()
     setIsTwoPlayer(true)
     setIsVsAi(true)
     setIsCoop(false)
@@ -501,6 +536,7 @@ export default function App() {
 
   // 반쪽 협동: 2인 모드처럼 양쪽 화면에서 이름을 동시에 받는다
   const handleSelectCoopMode = () => {
+    resetStartGuard()
     const newKeywords = pickRandomKeywords(TOTAL_ROUNDS)
     setGameKeywords(newKeywords)
     setIsTwoPlayer(true)
@@ -526,6 +562,8 @@ export default function App() {
     }
 
     if (!isTwoPlayer) {
+      // 혼자 하기도 판마다 제시어를 새로 뽑는다 (안 그러면 새로고침 전까지 같은 10개가 반복된다)
+      setGameKeywords(pickRandomKeywords(TOTAL_ROUNDS))
       setCabB('leaderboard')
       startSimultaneousCountdown()
       return
@@ -568,6 +606,7 @@ export default function App() {
   const home = () => {
     // 게임을 끝내지 않고 나가면 이번 게임 그림은 갤러리에 올리지 않는다
     pendingGalleryRef.current = []
+    resetStartGuard()
     setCabA('idle')
     setCabB('leaderboard')
     setIsTwoPlayer(false)

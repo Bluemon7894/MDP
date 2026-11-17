@@ -8,6 +8,7 @@ import { onArcade, postArcade } from '../utils/arcadeSync'
 import { AdvancedAnalysisModal } from './Modals'
 import { ToolBar, snapshotOf, useDrawingPad } from './DrawingPad'
 import { Button, Label, Overlay, Panel, KeywordTitle } from './ui'
+import { GuessBoard, toGuessItems } from './GuessBoard'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 반쪽 협동: 같은 제시어를 1P 는 왼쪽 반, 2P 는 오른쪽 반만 동시에 그린다.
@@ -98,9 +99,34 @@ export function ScreenHalf({
   const timeLeftRef = useRef(timeLeft)
   timeLeftRef.current = timeLeft
 
-  const pad = useDrawingPad({ width: HALF_W, height: CANVAS_H, enabled: !myDone && result === null })
+  const pad = useDrawingPad({
+    width: HALF_W,
+    height: CANVAS_H,
+    enabled: !myDone && result === null,
+    // 획을 그을 때마다 AI가 내 반쪽만 보고 무엇을 떠올리는지 오른쪽 칸에 띄운다 (채점과는 무관)
+    onStrokeEnd: () => runHalfRecognition(),
+  })
   const { canvasRef, hasDrawn } = pad
   const { ref: stageRef, size } = useFitBox(16 / 10)
+
+  // 내 반쪽 실시간 추론 키워드 (한글)
+  const [halfGuesses, setHalfGuesses] = useState<string[]>([])
+  const halfSeq = useRef(0)
+  const runHalfRecognition = async () => {
+    const strokes = pad.recognitionStrokes()
+    const seq = ++halfSeq.current
+    if (!strokes.length) {
+      setHalfGuesses([])
+      return
+    }
+    const res = await recognizeDrawing(strokes, currentKeyword)
+    if (seq === halfSeq.current && res) setHalfGuesses(toGuessItems(res.more))
+  }
+  const clearHalf = () => {
+    pad.clear()
+    halfSeq.current++
+    setHalfGuesses([])
+  }
 
   // 라운드가 바뀌면 처음부터
   useEffect(() => {
@@ -113,6 +139,8 @@ export function ScreenHalf({
     halvesRef.current = {}
     evaluatedRef.current = false
     combinedRef.current = null
+    halfSeq.current++
+    setHalfGuesses([])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round, currentKeyword])
 
@@ -334,7 +362,7 @@ export function ScreenHalf({
             </div>
           </div>
 
-          <ToolBar pad={pad} disabled={!canDraw} onClear={pad.clear} submitLabel="완성" onSubmit={submit} submitDisabled={!canDraw || !hasDrawn} />
+          <ToolBar pad={pad} disabled={!canDraw} onUndo={runHalfRecognition} onClear={clearHalf} submitLabel="완성" onSubmit={submit} submitDisabled={!canDraw || !hasDrawn} />
         </div>
 
         <div className="w-64 2xl:w-80 flex flex-col gap-5 shrink-0">
@@ -357,13 +385,23 @@ export function ScreenHalf({
             </div>
           </Panel>
 
-                    <Panel className="p-6 flex-1 flex flex-col">
-            <Label>협동 안내</Label>
-            <p className="mt-4 font-display text-xl text-ink leading-relaxed">
-              {role === '1P' ? '1P는 왼쪽' : '2P는 오른쪽'} 절반을 맡아 그립니다.
+          {/* AI 판정: 내 반쪽을 AI가 보고 떠올린 것 → 결과가 나오면 합친 그림의 후보 */}
+          <Panel className="p-4 2xl:p-5 flex-1 min-h-0 flex flex-col overflow-hidden">
+            <Label>{result ? 'AI 판정 · 합친 그림' : `AI 판정 · 내 ${side} 반쪽`}</Label>
+            <p className="shrink-0 font-display text-lg 2xl:text-xl leading-snug mt-2 min-h-[2.5rem]">
+              {waitingNext
+                ? '다음 라운드를 준비하고 있습니다'
+                : result
+                  ? result.rank > 0
+                    ? `합친 그림을 ${result.rank}순위로 알아봤습니다.`
+                    : '합친 그림을 알아보지 못했습니다.'
+                  : `${role === '1P' ? '1P는 왼쪽' : '2P는 오른쪽'} 절반을 맡습니다. 보라색 눈금에 맞춰 ${partnerName}님과 크기를 맞추세요.`}
             </p>
-            <p className="mt-3 text-sm text-graphite leading-relaxed">보라색 눈금 높이에 맞춰 {partnerName}님과 크기를 맞춰 보세요. 한 사람만 그리면 협동 배율 때문에 0점입니다.</p>
-            {waitingNext && <p className="mt-auto pt-4 font-display text-lg text-violet">다음 라운드를 준비하고 있습니다</p>}
+            <GuessBoard
+              items={result ? toGuessItems(result.list) : halfGuesses}
+              target={currentKeyword.ko}
+              waiting="내 반쪽을 그리면 AI가 떠올린 것이 쌓입니다"
+            />
           </Panel>
         </div>
       </div>

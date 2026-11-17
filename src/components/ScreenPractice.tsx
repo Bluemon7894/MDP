@@ -6,7 +6,7 @@ import { recognizeDrawing } from '../utils/recognize'
 import { sound } from '../utils/sound'
 import { AdvancedAnalysisModal } from './Modals'
 import { ToolBar, snapshotOf, useDrawingPad } from './DrawingPad'
-import { DrawingTipsCard } from './DrawingTipsCard'
+import { GuessBoard, toGuessItems } from './GuessBoard'
 import { BackButton, Button, Label, Panel, KeywordTitle } from './ui'
 
 const CANVAS_W = 1200
@@ -18,6 +18,8 @@ const TURN_SEC = 20
 export function ScreenPractice({ onHome }: { onHome: () => void }) {
   const [keyword, setKeyword] = useState<KeywordMap>(() => pickRandomKeywords(1)[0])
   const [guesses, setGuesses] = useState<string[]>([])
+  // AI 판정 칸을 채우는 긴 추론 키워드 목록 (한글)
+  const [moreGuesses, setMoreGuesses] = useState<string[]>([])
   const [rank, setRank] = useState(0)
   const [status, setStatus] = useState('아무거나 그려 보세요. AI가 무엇으로 보는지 바로 알려 줍니다.')
   const [report, setReport] = useState<MetricBreakdown | null>(null)
@@ -32,6 +34,7 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
     const strokes = pad.recognitionStrokes()
     if (!strokes.length) {
       setGuesses([])
+      setMoreGuesses([])
       setRank(0)
     bestRankRef.current = 0
       return
@@ -45,6 +48,7 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
       return
     }
     setGuesses(res.list.map(toKorean))
+    setMoreGuesses(toGuessItems(res.more))
     setRank(res.rank)
     if (res.rank > 0 && (bestRankRef.current === 0 || res.rank < bestRankRef.current)) {
       bestRankRef.current = res.rank
@@ -105,6 +109,7 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
     pad.clear()
     seq.current++
     setGuesses([])
+    setMoreGuesses([])
     setRank(0)
     bestRankRef.current = 0
     setStatus('캔버스를 비웠습니다.')
@@ -117,6 +122,7 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
     pad.reset()
     seq.current++
     setGuesses([])
+    setMoreGuesses([])
     setRank(0)
     bestRankRef.current = 0
     setStartedAt(null)
@@ -197,22 +203,11 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
         </div>
 
         <div className="w-64 2xl:w-80 flex flex-col gap-5 shrink-0">
-                    <Panel className="p-4 2xl:p-5 flex-1 flex flex-col justify-between overflow-hidden">
-            <div>
-              <Label>AI 판정</Label>
-              <p className="font-display text-lg 2xl:text-xl leading-snug mt-2 min-h-[2.5rem]">{status}</p>
-              {guesses.length > 0 && (
-                <ol className="mt-2.5 flex flex-col gap-1">
-                  {guesses.map((g, i) => (
-                    <li key={i} className={`flex items-center gap-2.5 px-2.5 py-1 rounded-lg ${rank === i + 1 ? 'bg-ok/10 text-ok' : ''}`}>
-                      <span className="w-4 text-xs font-bold text-graphite tabular-nums">{i + 1}</span>
-                      <span className="font-display text-base 2xl:text-lg truncate">{g}</span>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </div>
-            <DrawingTipsCard />
+          {/* AI 판정: 상태 문구 + 칸을 꽉 채우는 추론 키워드 (1~5위는 채점 후보, 그 아래는 그 밖에 떠올린 것) */}
+          <Panel className="p-4 2xl:p-5 flex-1 min-h-0 flex flex-col overflow-hidden">
+            <Label>AI 판정</Label>
+            <p className="shrink-0 font-display text-lg 2xl:text-xl leading-snug mt-2 min-h-[2.5rem]">{status}</p>
+            <GuessBoard items={moreGuesses} target={rank > 0 ? keyword.ko : null} waiting="그리면 AI가 떠올린 것이 쌓입니다" />
           </Panel>
         </div>
       </div>

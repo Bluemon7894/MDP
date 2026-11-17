@@ -8,7 +8,7 @@ import { sound } from '../utils/sound'
 import { AdvancedAnalysisModal } from './Modals'
 import { Button, Label, Overlay, Panel, KeywordTitle } from './ui'
 import { INK, ToolBar, snapshotOf, useDrawingPad } from './DrawingPad'
-import { DrawingTipsCard } from './DrawingTipsCard'
+import { GuessBoard, toGuessItems } from './GuessBoard'
 
 
 const CANVAS_W = 1200
@@ -56,6 +56,8 @@ export function ScreenGame({
 
   const [statusText, setStatusText] = useState('')
   const [guesses, setGuesses] = useState<string[]>([])
+  // AI 판정 칸을 채우는 긴 추론 키워드 목록 (한글)
+  const [moreGuesses, setMoreGuesses] = useState<string[]>([])
   const [rank, setRank] = useState(0)
   const rankRef = useRef(0)
   const bestRankRef = useRef(0)
@@ -85,10 +87,11 @@ export function ScreenGame({
   const timeLeftRef = useRef(timeLeft)
   timeLeftRef.current = timeLeft
 
-  const setRecognition = (r: number, list: string[]) => {
+  const setRecognition = (r: number, list: string[], more: string[] = list) => {
     rankRef.current = r
     setRank(r)
     setGuesses(list.map(toKorean))
+    setMoreGuesses(toGuessItems(more))
   }
 
   // 라운드/턴 변경 시 초기화
@@ -122,7 +125,7 @@ export function ScreenGame({
       const res = await recognizeDrawing(strokes, currentKeyword)
       if (cancelled) return
       const r = res?.rank ?? 0
-      setRecognition(r, res?.list ?? [])
+      setRecognition(r, res?.list ?? [], res?.more ?? [])
       setStatusText(res ? (r ? `${r}순위로 인식되었습니다.` : '인식되지 않았습니다.') : '인식 서버에 연결하지 못했습니다.')
       setAnalysisReport(evaluateDrawing(canvas, doneAt, r, TURN_SEC, strokes))
     }
@@ -212,7 +215,7 @@ export function ScreenGame({
       bestRankRef.current = r
       sound.playAiRecognized(r)
     }
-    setRecognition(r, res.list)
+    setRecognition(r, res.list, res.more)
     
     setStatusText(r ? `${r}순위로 알아봤습니다. 핵심 선을 다듬거나 바로 완성하세요.` : `${toKorean(res.list[0])}(으)로 보고 있습니다.`)
   }
@@ -262,6 +265,8 @@ export function ScreenGame({
 
   return (
     <div className="h-full w-full flex flex-col overflow-hidden bg-paper font-ui text-ink relative select-none">
+      {/* AI와 대결(하드 모드): 화면 가장자리에서 안쪽으로 옅어지는 붉은 그라데이션으로 어려운 판임을 보여 준다 */}
+      {vsAi && <div className="absolute inset-0 z-40 pointer-events-none shadow-[inset_0_0_90px_18px_rgba(255,59,59,0.55),inset_0_0_14px_2px_rgba(255,59,59,0.7)]" />}
       {showExitConfirm && (
         <Overlay>
           <Panel className="p-9 w-[440px] text-center">
@@ -386,22 +391,16 @@ export function ScreenGame({
             </div>
           </Panel>
 
-                    <Panel className="p-4 2xl:p-5 flex-1 flex flex-col justify-between overflow-hidden">
-            <div>
-              <Label>AI 판정</Label>
-              <p className="font-display text-lg 2xl:text-xl leading-snug mt-2 min-h-[2.5rem]">{statusText}</p>
-              {guesses.length > 0 && (
-                <ol className="mt-2.5 flex flex-col gap-1">
-                  {guesses.map((g, i) => (
-                    <li key={i} className={`flex items-center gap-2.5 px-2.5 py-1 rounded-lg ${rank === i + 1 ? 'bg-ok/10 text-ok' : ''}`}>
-                      <span className="w-4 text-xs font-bold text-graphite tabular-nums">{i + 1}</span>
-                      <span className="font-display text-base 2xl:text-lg truncate">{g}</span>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </div>
-            <DrawingTipsCard />
+          {/* AI 판정: 상태 문구 + 칸을 꽉 채우는 추론 키워드 (1~5위는 채점 후보, 그 아래는 그 밖에 떠올린 것) */}
+          <Panel className="p-4 2xl:p-5 flex-1 min-h-0 flex flex-col overflow-hidden">
+            <Label>AI 판정</Label>
+            <p className="shrink-0 font-display text-lg 2xl:text-xl leading-snug mt-2 min-h-[2.5rem]">{statusText}</p>
+            <GuessBoard
+              items={moreGuesses}
+              target={rank > 0 ? currentKeyword.ko : null}
+              waiting={isAiPlayer ? 'AI가 그리는 중입니다' : isMyTurn ? '그리면 AI가 떠올린 것이 쌓입니다' : `${drawerName}님이 그리는 중입니다`}
+              dim={!isMyTurn && !isAiPlayer}
+            />
           </Panel>
         </div>
       </div>

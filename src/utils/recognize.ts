@@ -6,6 +6,7 @@ import friendSignatures from '../constants/friendsDrawingsSignatures.json'
 // Quick, Draw! 는 학습 데이터가 대부분 바로 선 그림이라 눕혀 그리면 못 알아본다.
 // 그래서 0°/90°/180°/270° 로 돌린 그림을 한 번에 보내고, 어느 방향에서든 알아본 결과를 인정한다.
 const ANGLES = [0, 90, 180, 270]
+const GOOGLE_TIMEOUT_MS = 6000
 
 function rotate(strokes: number[][][], deg: number) {
   if (deg === 0) return strokes
@@ -29,6 +30,25 @@ export interface Recognition {
   list: string[]
   /** 제시어가 몇 위로 인식됐는지 (0 = 5위 밖) */
   rank: number
+  /** 화면에 보여 줄 더 긴 후보 목록 (list 로 시작하고 그 밖에 떠올린 것이 이어진다. 채점에는 쓰지 않는다) */
+  more: string[]
+}
+
+/** 화면에 보여 줄 후보 수 (한글로 바꾼 뒤 겹치는 것을 빼면 조금 줄 수 있다) */
+const MORE_MAX = 20
+
+/** 영문 라벨 목록들을 순서대로 이어 붙이되 같은 라벨은 한 번만 */
+const mergeLabels = (...lists: string[][]) => {
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const g of lists.flat()) {
+    const key = normEn(g)
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(g)
+    if (out.length >= MORE_MAX) break
+  }
+  return out
 }
 
 /**
@@ -83,7 +103,7 @@ function extractGrid16(strokes: number[][][]): Float32Array | null {
   return grid
 }
 
-function matchFriendDataset(grid: Float32Array, kw: KeywordMap): { list: string[]; rank: number } {
+function matchFriendDataset(grid: Float32Array, kw: KeywordMap): Recognition {
   const scores: { en: string; score: number }[] = []
   const targetEn = normEn(kw.en)
 
@@ -110,12 +130,12 @@ function matchFriendDataset(grid: Float32Array, kw: KeywordMap): { list: string[
     }
   }
 
-  return { list: top5, rank }
+  return { list: top5, rank, more: scores.slice(0, MORE_MAX).map(s => s.en) }
 }
 
 export async function recognizeDrawing(strokes: number[][][], kw: KeywordMap): Promise<Recognition | null> {
   // 1. 친구들 손그림 기반 로컬 AI 모델 매칭 (초고속 오프라인 추론)
-  let friendResult: { list: string[]; rank: number } | null = null
+  let friendResult: Recognition | null = null
   const grid = extractGrid16(strokes)
   if (grid) {
     friendResult = matchFriendDataset(grid, kw)
@@ -123,9 +143,13 @@ export async function recognizeDrawing(strokes: number[][][], kw: KeywordMap): P
 
   // 2. 구글 Quick, Draw! 온라인 API 호출 (병행 앙상블)
   let googleResult: Recognition | null = null
+  // 네트워크가 멈추면 fetch 가 끝나지 않아 AI 차례·협동 채점이 영원히 기다린다. 제한 시간을 둔다
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), GOOGLE_TIMEOUT_MS)
   try {
     const res = await fetch('https://inputtools.google.com/request?ime=handwriting&app=quickdraw', {
       method: 'POST',
+      signal: controller.signal,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         input_type: 0,
@@ -137,7 +161,8 @@ export async function recognizeDrawing(strokes: number[][][], kw: KeywordMap): P
       }),
     })
     const data = await res.json()
-    const lists: string[][] = (data?.[1] ?? []).map((r: unknown[]) => ((r?.[1] as string[]) ?? []).slice(0, 5))
+    const deep: string[][] = (data?.[1] ?? []).map((r: unknown[]) => (r?.[1] as string[]) ?? [])
+    const lists = deep.map(l => l.slice(0, 5))
     if (lists.some(l => l.length)) {
       const best = new Map<string, { rank: number; angle: number }>()
       lists.forEach((l, a) => l.forEach((g, i) => {
@@ -151,10 +176,16 @@ export async function recognizeDrawing(strokes: number[][][], kw: KeywordMap): P
         .sort(([, a], [, b]) => a.rank - b.rank || a.angle - b.angle)
         .map(([g]) => g)
       if (target) list.splice(rank - 1, 0, target)
-      googleResult = { list: list.slice(0, 5), rank }
+      // 화면용 긴 목록: 방향별 6위 아래 후보까지 순위대로 섞는다
+      const deeper = new Map<string, number>()
+      deep.forEach(l => l.forEach((g, i) => deeper.set(g, Math.min(deeper.get(g) ?? Infinity, i))))
+      const rest = [...deeper.entries()].sort((a, b) => a[1] - b[1]).map(([g]) => g)
+      googleResult = { list: list.slice(0, 5), rank, more: mergeLabels(list.slice(0, 5), rest) }
     }
   } catch {
-    // 온라인 API 실패 시(인터넷 없음/오프라인)
+    // 온라인 API 실패 시(인터넷 없음/오프라인/시간 초과)
+  } finally {
+    clearTimeout(timeoutId)
   }
 
   // 3. 앙상블: 실제 정답을 맞힌 쪽(더 높은 순위)의 후보 목록을 우선 사용하고, rank 와 목록 인덱스가 항상 1:1 일치하도록 보장
@@ -163,6 +194,7 @@ export async function recognizeDrawing(strokes: number[][][], kw: KeywordMap): P
       friendResult.rank > 0 && (googleResult.rank === 0 || friendResult.rank < googleResult.rank)
     const primary = preferFriend ? friendResult.list : googleResult.list
     const secondary = preferFriend ? googleResult.list : friendResult.list
+    const [primaryMore, secondaryMore] = preferFriend ? [friendResult.more, googleResult.more] : [googleResult.more, friendResult.more]
 
     const mergedList: string[] = []
     const seen = new Set<string>()
@@ -176,13 +208,13 @@ export async function recognizeDrawing(strokes: number[][][], kw: KeywordMap): P
     }
 
     const targetIdx = mergedList.findIndex(g => isTarget(g, kw))
-    return { list: mergedList, rank: targetIdx >= 0 ? targetIdx + 1 : 0 }
+    return { list: mergedList, rank: targetIdx >= 0 ? targetIdx + 1 : 0, more: mergeLabels(mergedList, primaryMore, secondaryMore) }
   }
 
   if (friendResult && friendResult.rank > 0) {
     const targetIdx = friendResult.list.findIndex(g => isTarget(g, kw))
-    return { list: friendResult.list, rank: targetIdx >= 0 ? targetIdx + 1 : 0 }
+    return { list: friendResult.list, rank: targetIdx >= 0 ? targetIdx + 1 : 0, more: friendResult.more }
   }
 
-  return googleResult || (friendResult ? { list: friendResult.list, rank: 0 } : null)
+  return googleResult || (friendResult ? { list: friendResult.list, rank: 0, more: friendResult.more } : null)
 }
