@@ -6,7 +6,7 @@ import { bestScoreIn } from './utils/rankingCore'
 import { GalleryItem, postGallery } from './utils/gallery'
 import { postArcade, onArcade, onRankingsChanged, ArcadeMessage } from './utils/arcadeSync'
 import { dispenseCandy } from './utils/candyDispenser'
-import { calmBgm } from './utils/calmBgm'
+import { sound } from './utils/sound'
 
 import { CustomAlertModal, ArcadeBackground } from './components/CommonUI'
 import { HangulKeyboard } from './components/HangulKeyboard'
@@ -57,28 +57,28 @@ export default function App() {
     type: 'alert',
   })
 
-  // 잔잔한 BGM 활성화 상태 (브라우저 최초 상호작용 시 자동 시작)
-  const [bgmEnabled, setBgmEnabled] = useState(false)
+  // 사운드(BGM + 효과음) 상태: 1P 화면(?screen=a)에서만 재생하고 랭킹 화면(?screen=b)은 완전히 무음 처리
+  const [soundEnabled, setSoundEnabled] = useState(true)
 
   useEffect(() => {
-    const handleFirstInteraction = () => {
-      calmBgm.start()
-      setBgmEnabled(true)
-      window.removeEventListener('click', handleFirstInteraction)
-      window.removeEventListener('keydown', handleFirstInteraction)
-      window.removeEventListener('touchstart', handleFirstInteraction)
-    }
+    sound.setScreenAllowed(screenMode !== 'b')
+  }, [screenMode])
 
-    window.addEventListener('click', handleFirstInteraction)
-    window.addEventListener('keydown', handleFirstInteraction)
-    window.addEventListener('touchstart', handleFirstInteraction)
-
-    return () => {
-      window.removeEventListener('click', handleFirstInteraction)
-      window.removeEventListener('keydown', handleFirstInteraction)
-      window.removeEventListener('touchstart', handleFirstInteraction)
+  useEffect(() => {
+    if (screenMode === 'b' || countdown !== null) {
+      sound.setBgmTrack('none')
+      return
     }
-  }, [])
+    if (cabA === 'inGame') {
+      sound.setBgmTrack(customModal.isOpen ? 'none' : 'game')
+      return
+    }
+    if (cabA === 'practice') {
+      sound.setBgmTrack('game')
+      return
+    }
+    sound.setBgmTrack('menu')
+  }, [screenMode, cabA, countdown, customModal.isOpen])
 
   const gameFinishedRef = useRef(false)
   const p1ReadyRef = useRef(false)
@@ -191,6 +191,7 @@ export default function App() {
         setRankings(payload.rankings)
       } else if (type === 'GAME_RESULT') {
         // 마지막 라운드를 마친 화면이 보낸 결과를 이 화면에도 띄운다 (이 화면에서 그린 그림도 이제 갤러리에 올린다)
+        if (!gameFinishedRef.current) sound.playVictory()
         gameFinishedRef.current = true
         flushGallery()
         setCustomModal({ isOpen: true, type: 'alert', title: payload.title, message: payload.message, onConfirm: () => home() })
@@ -300,6 +301,7 @@ export default function App() {
     if (!isTwoPlayer) {
       const r1 = saveRecord(p1Name, finalP1Score, 'solo', '1P')
     dispenseCandy('solo_complete')
+      sound.playVictory()
       submitRecords([r1])
       setCustomModal({
         isOpen: true,
@@ -317,6 +319,8 @@ ${recordNote(p1Name, r1)}`,
       const r1 = saveRecord(p1Name, finalP1Score, 'ai', '1P')
       submitRecords([r1])
     if (finalP1Score > finalP2Score) dispenseCandy('beat_ai')
+      if (finalP1Score >= finalP2Score) sound.playVictory()
+      else sound.playDefeat()
       const result = finalP1Score > finalP2Score ? 'AI를 이겼습니다.' : finalP1Score < finalP2Score ? 'AI가 이겼습니다.' : '무승부입니다.'
       setCustomModal({
         isOpen: true,
@@ -339,6 +343,7 @@ ${recordNote(p1Name, r1)}`,
       // 반쪽 협동은 팀 이름 하나로 팀 점수만 올린다
       const team = `${p1Name} & ${p2Name}`
     dispenseCandy('coop_complete')
+      sound.playVictory()
       const r = saveRecord(team, finalP1Score, 'coop', '1P')
       submitRecords([r])
       announce('반쪽 협동 완주', `${team} 팀 ${finalP1Score.toLocaleString()}점
@@ -350,6 +355,7 @@ ${recordNote(team, r)}`)
     const r2 = saveRecord(p2Name, finalP2Score, 'pvp', '2P')
     submitRecords([r1, r2])
     if (finalP1Score !== finalP2Score) dispenseCandy('pvp_winner')
+    sound.playVictory()
     const winner = finalP1Score > finalP2Score ? `${p1Name}님 승리` : finalP1Score < finalP2Score ? `${p2Name}님 승리` : '무승부'
     announce(
       winner,
@@ -635,21 +641,23 @@ ${recordNote(p2Name, r2)}`,
         onClose={() => setCustomModal({ isOpen: false, title: '', message: '', type: 'alert' })}
       />
 
-      {/* BGM On/Off 및 화면 전환 버튼 */}
+      {/* 사운드 On/Off (1P 화면 전용) 및 화면 전환 버튼 */}
       {!isPlayingGame && (cabA === 'idle' || (screenMode === 'b' && cabB === 'leaderboard')) && (
         <div className="absolute top-3 right-3 z-50 flex items-center gap-2 p-1 rounded-xl bg-white/80 border border-black/5 opacity-40 hover:opacity-100 transition-opacity font-ui">
-          <button
-            type="button"
-            onClick={() => {
-              const active = calmBgm.toggle()
-              setBgmEnabled(active)
-            }}
-            className={`px-3 h-8 rounded-lg text-xs font-bold transition-all ${
-              bgmEnabled ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-700'
-            }`}
-          >
-            {bgmEnabled ? 'BGM ON' : 'BGM OFF'}
-          </button>
+          {screenMode !== 'b' && (
+            <button
+              type="button"
+              onClick={() => {
+                const active = sound.toggleSound()
+                setSoundEnabled(active)
+              }}
+              className={`px-3 h-8 rounded-lg text-xs font-bold transition-all ${
+                soundEnabled ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-700'
+              }`}
+            >
+              {soundEnabled ? '사운드 ON' : '사운드 OFF'}
+            </button>
+          )}
           {(['a', 'b'] as const).map(s => (
             <button
               key={s}

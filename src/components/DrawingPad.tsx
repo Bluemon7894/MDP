@@ -1,4 +1,5 @@
 import React, { useLayoutEffect, useRef, useState } from 'react'
+import { sound } from '../utils/sound'
 import { Button } from './ui'
 
 // 게임 화면들이 같이 쓰는 그림판: 도구(연필·지우개), 굵기 선택, 되돌리기, 전체 지우기
@@ -251,7 +252,10 @@ export function ToolBar({
           <button
             key={t.id}
             type="button"
-            onClick={() => setTool(t.id)}
+            onClick={() => {
+              sound.playTool()
+              setTool(t.id)
+            }}
             className={`h-14 ${toolPad} rounded-xl text-left transition-colors ${tool === t.id ? 'bg-ink text-white' : 'text-ink hover:bg-paper'}`}
           >
             <div className={`font-display leading-tight ${tight ? 'text-base' : 'text-lg'}`}>{t.label}</div>
@@ -266,7 +270,10 @@ export function ToolBar({
           <button
             key={i}
             type="button"
-            onClick={() => setSizeIdx(i)}
+            onClick={() => {
+              sound.playTool()
+              setSizeIdx(i)
+            }}
             aria-label={`굵기 ${i + 1}`}
             className={`${sizeW} h-14 rounded-xl flex items-center justify-center transition-colors ${sizeIdx === i ? 'bg-paper ring-2 ring-ink' : 'hover:bg-paper'}`}
           >
@@ -276,7 +283,20 @@ export function ToolBar({
       </div>
 
       {/* 되돌리기 */}
-      <Button variant="secondary" size="sm" className={tight ? iconBtn : 'h-14 px-4'} title="되돌리기" onClick={() => pad.undo() && onUndo?.()} disabled={pad.undoCount === 0}>
+      <Button
+        variant="secondary"
+        size="sm"
+        sfx="none"
+        className={tight ? iconBtn : 'h-14 px-4'}
+        title="되돌리기"
+        onClick={() => {
+          if (pad.undo()) {
+            sound.playUndo()
+            onUndo?.()
+          }
+        }}
+        disabled={pad.undoCount === 0}
+      >
         {tight ? (
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-label="되돌리기">
             <path d="M7.5 5L3.5 9l4 4M4 9h7.5a4.5 4.5 0 010 9H9" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -287,7 +307,17 @@ export function ToolBar({
       </Button>
 
       {/* 전체 지우기 */}
-      <Button variant="secondary" size="sm" className={tight ? iconBtn : 'h-14 px-4'} title="전체 지우기" onClick={onClear}>
+      <Button
+        variant="secondary"
+        size="sm"
+        sfx="none"
+        className={tight ? iconBtn : 'h-14 px-4'}
+        title="전체 지우기"
+        onClick={() => {
+          sound.playClear()
+          onClear()
+        }}
+      >
         {tight ? (
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-label="전체 지우기">
             <path d="M4 6h12M8 6V4h4v2M6 6l.8 10h6.4L14 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -298,7 +328,7 @@ export function ToolBar({
       </Button>
 
       {/* 완성 / 제출 버튼 */}
-      <Button size="md" className="flex-1 min-w-28 h-14 text-xl" onClick={onSubmit} disabled={submitDisabled}>
+      <Button size="md" sfx="submit" className="flex-1 min-w-28 h-14 text-xl" onClick={onSubmit} disabled={submitDisabled}>
         {submitLabel}
       </Button>
     </div>

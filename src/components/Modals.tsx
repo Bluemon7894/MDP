@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { sound } from '../utils/sound'
 import { ArcadeBackground } from './CommonUI'
 import { BackButton, Button, Overlay, Panel } from './ui'
 
@@ -63,8 +64,8 @@ export function ModeModal({
               <li>이기려면 AI가 1순위로 알아볼 형태, 최적의 스트로크 획수, 빠른 완성을 모두 해내야 합니다.</li>
             </ul>
             <div className="flex gap-3 mt-8 justify-end">
-              <Button variant="secondary" onClick={() => setWarnHard(false)}>다른 모드 고르기</Button>
-              <Button onClick={onVsAI}>도전하기</Button>
+              <Button variant="secondary" sfx="back" onClick={() => setWarnHard(false)}>다른 모드 고르기</Button>
+              <Button sfx="start" onClick={onVsAI}>도전하기</Button>
             </div>
           </Panel>
         </Overlay>
@@ -81,7 +82,10 @@ export function ModeModal({
               <button
                 key={m.key}
                 type="button"
-                onClick={handlers[m.key]}
+                onClick={() => {
+                  sound.playClick()
+                  handlers[m.key]()
+                }}
                 className={`group text-left rounded-3xl p-7 flex flex-col min-h-[340px] border-2 transition-transform hover:-translate-y-1 ${
                   dark
                     ? 'bg-ink text-white border-ink shadow-[0_8px_0_#170c26]'
@@ -110,6 +114,10 @@ export function ModeModal({
 }
 
 export function CountdownOverlay({ count }: { count: number }) {
+  useEffect(() => {
+    sound.playCountdown(count)
+  }, [count])
+
   return (
     <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-ink text-white font-ui select-none">
       <div className="text-xl font-bold text-white/50">{count > 0 ? '곧 시작합니다' : '시작'}</div>

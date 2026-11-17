@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react'
+import { sound } from '../utils/sound'
 import { ArcadeBackground } from './CommonUI'
 import { BackButton, Button, Screen } from './ui'
 
@@ -148,7 +149,10 @@ export function HangulKeyboard({
                     <button
                       key={idx}
                       type="button"
-                      onClick={() => setAssembledName(cand)}
+                      onClick={() => {
+                        sound.playTool()
+                        setAssembledName(cand)
+                      }}
                       className="h-10 px-4 rounded-xl bg-white border-2 border-line font-display text-lg hover:border-violet/40"
                     >
                       {cand}
@@ -181,8 +185,8 @@ export function HangulKeyboard({
         </div>
 
         <div className="flex gap-4">
-          <Button variant="secondary" size="lg" onClick={clearCanvas}>다시 쓰기</Button>
-          <Button size="lg" onClick={() => onComplete(assembledName.trim() || '익명')}>이 이름으로 시작</Button>
+          <Button variant="secondary" size="lg" sfx="none" onClick={() => { sound.playClear(); clearCanvas() }}>다시 쓰기</Button>
+          <Button size="lg" sfx="start" onClick={() => onComplete(assembledName.trim() || '익명')}>이 이름으로 시작</Button>
         </div>
       </main>
     </Screen>

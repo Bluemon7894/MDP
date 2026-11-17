@@ -4,6 +4,7 @@ import { toKorean } from '../constants/quickdraw'
 import { createAiArtwork } from '../utils/aiRender'
 import { evaluateDrawing } from '../utils/scoring'
 import { recognizeDrawing } from '../utils/recognize'
+import { sound } from '../utils/sound'
 import { AdvancedAnalysisModal } from './Modals'
 import { Button, Label, Overlay, Panel, KeywordTitle } from './ui'
 import { INK, ToolBar, snapshotOf, useDrawingPad } from './DrawingPad'
@@ -57,6 +58,7 @@ export function ScreenGame({
   const [guesses, setGuesses] = useState<string[]>([])
   const [rank, setRank] = useState(0)
   const rankRef = useRef(0)
+  const bestRankRef = useRef(0)
   const recogSeq = useRef(0)
   const [showExitConfirm, setShowExitConfirm] = useState(false)
   const [analysisReport, setAnalysisReport] = useState<MetricBreakdown | null>(null)
@@ -95,6 +97,7 @@ export function ScreenGame({
     setSubmitted(false)
     setAnalysisReport(null)
     setRecognition(0, [])
+    bestRankRef.current = 0
     setAiPenPos(null)
     recogSeq.current++
 
@@ -183,7 +186,9 @@ export function ScreenGame({
   useEffect(() => {
     if (timeLeft === 0 && isMyTurn && !submitted && analysisReport === null && canvasRef.current) {
       pad.stopDrawing()
+      sound.playSubmit()
       setAnalysisReport(evaluateDrawing(canvasRef.current, 0, rankRef.current, TURN_SEC, pad.recognitionStrokes()))
+      
     }
   }, [timeLeft, isMyTurn, analysisReport, submitted])
 
@@ -191,6 +196,7 @@ export function ScreenGame({
     const strokes = pad.recognitionStrokes()
     if (!strokes.length) {
       setRecognition(0, [])
+    bestRankRef.current = 0
       return
     }
     const seq = ++recogSeq.current
@@ -202,7 +208,12 @@ export function ScreenGame({
       return
     }
     const r = res.rank
+    if (r > 0 && (bestRankRef.current === 0 || r < bestRankRef.current)) {
+      bestRankRef.current = r
+      sound.playAiRecognized(r)
+    }
     setRecognition(r, res.list)
+    
     setStatusText(r ? `${r}순위로 알아봤습니다. 핵심 선을 다듬거나 바로 완성하세요.` : `${toKorean(res.list[0])}(으)로 보고 있습니다.`)
   }
 
@@ -211,6 +222,7 @@ export function ScreenGame({
     pad.clear()
     recogSeq.current++
     setRecognition(0, [])
+    bestRankRef.current = 0
     setStatusText('캔버스를 비웠습니다.')
   }
 
@@ -222,6 +234,22 @@ export function ScreenGame({
   const curTime = isNaN(timeLeft) ? 0 : timeLeft
   const warn = curTime <= 5
   const canDraw = isMyTurn && analysisReport === null && !submitted
+
+  // 남은 시간 5초 이하 경고 틱
+  useEffect(() => {
+    if (canDraw && curTime >= 1 && curTime <= 5) {
+      sound.playTimerTick(curTime)
+    }
+  }, [canDraw, curTime])
+
+  // 동시 대결에서 상대가 먼저 완성을 눌렀을 때 알림 효과음
+  const opponentRole: ActivePlayer = drawer === '1P' ? '2P' : '1P'
+  const opponentDone = simultaneous && doneRoles.includes(opponentRole)
+  useEffect(() => {
+    if (opponentDone && !submitted) {
+      sound.playPartnerDone()
+    }
+  }, [opponentDone, submitted])
 
   // 점수판 상태: 동시 대결은 둘 다 그리는 중/완성, 번갈아 하는 모드는 차례인 사람만 그리는 중
   const playerState = (id: ActivePlayer) =>
@@ -241,7 +269,7 @@ export function ScreenGame({
             <p className="text-graphite mt-3">지금까지의 점수는 저장되지 않습니다.</p>
             <div className="flex gap-3 mt-8 justify-center">
               <Button variant="secondary" onClick={() => setShowExitConfirm(false)}>계속하기</Button>
-              <Button onClick={onHome}>그만두기</Button>
+              <Button sfx="back" onClick={onHome}>그만두기</Button>
             </div>
           </Panel>
         </Overlay>
@@ -266,7 +294,7 @@ export function ScreenGame({
 
       {/* 상단: 라운드 · 제시어 · 남은 시간 */}
       <header className="flex items-center gap-8 px-8 h-24 shrink-0 bg-white border-b-2 border-line">
-        <Button variant="secondary" size="sm" onClick={() => setShowExitConfirm(true)}>나가기</Button>
+        <Button variant="secondary" size="sm" sfx="back" onClick={() => setShowExitConfirm(true)}>나가기</Button>
         <div>
           <Label>라운드</Label>
           <div className="font-display text-3xl leading-none mt-1 tabular-nums">

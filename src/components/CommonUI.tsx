@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { BtnColor, CustomModalState } from '../types'
+import { sound } from '../utils/sound'
 import { Button, Overlay, Panel } from './ui'
 import { SketchbookBackground } from './SketchbookBackground'
 
@@ -12,8 +13,8 @@ const BTNS: Record<BtnColor, { bg: string; sh: string; tx: string; inset: string
 }
 
 export function ClayBtn({
-  children, color = 'coral', onClick, pulse = false, size = 'md', className = '',
-}: { children: React.ReactNode; color?: BtnColor; onClick?: () => void; pulse?: boolean; size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'; className?: string }) {
+  children, color = 'coral', onClick, pulse = false, size = 'md', className = '', sfx = 'click',
+}: { children: React.ReactNode; color?: BtnColor; onClick?: () => void; pulse?: boolean; size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'; className?: string; sfx?: 'start' | 'click' }) {
   const [pressed, setPressed] = useState(false)
   const c = BTNS[color]
   const pad: Record<string, string> = {
@@ -23,7 +24,11 @@ export function ClayBtn({
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => {
+        if (sfx === 'start') sound.playStart()
+        else sound.playClick()
+        onClick?.()
+      }}
       onPointerDown={() => setPressed(true)}
       onPointerUp={() => setPressed(false)}
       onPointerLeave={() => setPressed(false)}
@@ -85,6 +90,7 @@ export function CustomAlertModal({ modal, onClose }: { modal: CustomModalState; 
           {modal.type === 'confirm' && (
             <Button
               variant="secondary"
+              sfx="back"
               onClick={() => {
                 modal.onCancel?.()
                 onClose()

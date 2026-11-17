@@ -3,6 +3,7 @@ import { KeywordMap, MetricBreakdown } from '../types'
 import { pickRandomKeywords, toKorean } from '../constants/quickdraw'
 import { evaluateDrawing } from '../utils/scoring'
 import { recognizeDrawing } from '../utils/recognize'
+import { sound } from '../utils/sound'
 import { AdvancedAnalysisModal } from './Modals'
 import { ToolBar, snapshotOf, useDrawingPad } from './DrawingPad'
 import { DrawingTipsCard } from './DrawingTipsCard'
@@ -24,6 +25,7 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
   const [timeLeft, setTimeLeft] = useState(TURN_SEC)
   const seq = useRef(0)
   const rankRef = useRef(0)
+  const bestRankRef = useRef(0)
   rankRef.current = rank
 
   const runRecognition = async () => {
@@ -31,6 +33,7 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
     if (!strokes.length) {
       setGuesses([])
       setRank(0)
+      bestRankRef.current = 0
       return
     }
     const mySeq = ++seq.current
@@ -43,6 +46,10 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
     }
     setGuesses(res.list.map(toKorean))
     setRank(res.rank)
+    if (res.rank > 0 && (bestRankRef.current === 0 || res.rank < bestRankRef.current)) {
+      bestRankRef.current = res.rank
+      sound.playAiRecognized(res.rank)
+    }
     setStatus(res.rank ? `${keyword.ko}(으)로 ${res.rank}순위 인식했습니다.` : `${toKorean(res.list[0])}(으)로 보고 있습니다.`)
   }
 
@@ -73,11 +80,20 @@ export function ScreenPractice({ onHome }: { onHome: () => void }) {
       const left = Math.max(0, TURN_SEC - Math.floor((Date.now() - startedAt) / 1000))
       setTimeLeft(left)
       // 시간이 다 되면 실전처럼 그대로 채점
-      if (left === 0) judge(0)
+      if (left === 0) {
+        sound.playSubmit()
+        judge(0)
+      }
     }, 200)
     return () => clearInterval(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startedAt, report])
+
+  useEffect(() => {
+    if (startedAt !== null && !report && timeLeft >= 1 && timeLeft <= 5) {
+      sound.playTimerTick(timeLeft)
+    }
+  }, [startedAt, report, timeLeft])
 
   const reportImage = useMemo(
     () => (report && canvasRef.current ? snapshotOf(canvasRef.current, 960, 0.85) : undefined),

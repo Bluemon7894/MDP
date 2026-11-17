@@ -1,9 +1,11 @@
 import React from 'react'
+import { sound } from '../utils/sound'
 
 // 게임 화면 공용 UI. 홈 화면의 클레이 버튼·크림 배경 톤을 따르되 장식은 덜어낸다.
 
 type ButtonVariant = 'primary' | 'violet' | 'secondary' | 'ghost'
 type ButtonSize = 'sm' | 'md' | 'lg'
+export type SfxKind = 'click' | 'back' | 'submit' | 'start' | 'none'
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary: 'bg-accent text-white shadow-[0_5px_0_var(--color-accent-deep)] active:translate-y-[5px] active:shadow-none',
@@ -18,16 +20,29 @@ const SIZES: Record<ButtonSize, string> = {
   lg: 'h-16 px-10 text-2xl',
 }
 
+function playButtonSfx(sfx: SfxKind) {
+  if (sfx === 'click') sound.playClick()
+  else if (sfx === 'back') sound.playBack()
+  else if (sfx === 'submit') sound.playSubmit()
+  else if (sfx === 'start') sound.playStart()
+}
+
 export function Button({
   variant = 'primary',
   size = 'md',
+  sfx = 'click',
   className = '',
   type = 'button',
+  onClick,
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; size?: ButtonSize }) {
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; size?: ButtonSize; sfx?: SfxKind }) {
   return (
     <button
       type={type}
+      onClick={e => {
+        playButtonSfx(sfx)
+        onClick?.(e)
+      }}
       className={`inline-flex items-center justify-center gap-2 shrink-0 whitespace-nowrap rounded-2xl font-display transition-[transform,box-shadow,border-color,color] duration-75 disabled:opacity-35 disabled:pointer-events-none ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
       {...props}
     />
@@ -56,7 +71,14 @@ export function Screen({ children, className = '' }: { children: React.ReactNode
 
 export function BackButton({ onClick, children = '돌아가기' }: { onClick: () => void; children?: React.ReactNode }) {
   return (
-    <button type="button" onClick={onClick} className="inline-flex items-center gap-2 h-11 text-lg font-display text-graphite hover:text-ink transition-colors">
+    <button
+      type="button"
+      onClick={() => {
+        sound.playBack()
+        onClick()
+      }}
+      className="inline-flex items-center gap-2 h-11 text-lg font-display text-graphite hover:text-ink transition-colors"
+    >
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
         <path d="M12.5 4.5L7 10l5.5 5.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>

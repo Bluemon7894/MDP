@@ -134,10 +134,10 @@ export function ScreenIdle({ onStart, onPractice, rankings = [] }: { onStart: ()
 
       {/* 시작 버튼 + 연습 공간 */}
       <div className="z-10 mt-4 flex items-center gap-6">
-        <ClayBtn color="coral" size="xl" onClick={onStart}>
+        <ClayBtn color="coral" size="xl" sfx="start" onClick={onStart}>
           ▶ START GAME
         </ClayBtn>
-        <ClayBtn color="purple" size="lg" onClick={onPractice}>
+        <ClayBtn color="purple" size="lg" sfx="click" onClick={onPractice}>
           연습하기
         </ClayBtn>
       </div>

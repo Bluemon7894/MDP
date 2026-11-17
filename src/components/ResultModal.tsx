@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { MetricBreakdown } from '../types'
+import { sound } from '../utils/sound'
 import { Button, Label, Overlay, Panel } from './ui'
 
 const AUTO_SEC = 7
@@ -176,6 +177,31 @@ export function AdvancedAnalysisModal({
   const multiplier = report.items.find(it => it.multiplier !== undefined)?.multiplier
   const ROW_GAP = 160
   const totalDelay = 250 + report.items.length * ROW_GAP + 350
+
+  // 연출 효과음 (합체 / 확대 심사 / 점수 카드 팝업 / 총점 쾅!)
+  useEffect(() => {
+    if (phase === 'merge') {
+      sound.playMerge()
+      return
+    }
+    if (phase === 'inspect') {
+      sound.playInspect(step)
+      return
+    }
+    if (phase === 'result') {
+      const timers: number[] = []
+      report.items.forEach((_, i) => {
+        timers.push(window.setTimeout(() => sound.playScoreItem(i), 250 + i * ROW_GAP))
+      })
+      timers.push(
+        window.setTimeout(() => {
+          sound.playRoundResult(hit > 0 || report.totalPts >= 450)
+        }, totalDelay),
+      )
+      return () => timers.forEach(t => window.clearTimeout(t))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, step])
 
   const resultBody = (
     <div>

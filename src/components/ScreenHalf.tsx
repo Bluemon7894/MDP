@@ -3,6 +3,7 @@ import { KeywordMap, MetricBreakdown } from '../types'
 import { toKorean } from '../constants/quickdraw'
 import { evaluateCoop } from '../utils/scoring'
 import { recognizeDrawing } from '../utils/recognize'
+import { sound } from '../utils/sound'
 import { onArcade, postArcade } from '../utils/arcadeSync'
 import { AdvancedAnalysisModal } from './Modals'
 import { ToolBar, snapshotOf, useDrawingPad } from './DrawingPad'
@@ -187,7 +188,10 @@ export function ScreenHalf({
   // 시간이 다 되면 자동 완성. 1P 는 상대 반쪽을 조금 더 기다렸다가 있는 것만으로 채점
   useEffect(() => {
     if (timeLeft > 0 || result) return
-    if (!myDone) submit()
+    if (!myDone) {
+      sound.playSubmit()
+      submit()
+    }
     if (!isHost) return
     const t = setTimeout(evaluate, PARTNER_GRACE_MS)
     return () => clearTimeout(t)
@@ -197,6 +201,18 @@ export function ScreenHalf({
   const curTime = isNaN(timeLeft) ? 0 : timeLeft
   const warn = curTime <= 5
   const canDraw = !myDone && result === null
+
+  useEffect(() => {
+    if (canDraw && curTime >= 1 && curTime <= 5) {
+      sound.playTimerTick(curTime)
+    }
+  }, [canDraw, curTime])
+
+  useEffect(() => {
+    if (partnerDone && !myDone) {
+      sound.playPartnerDone()
+    }
+  }, [partnerDone, myDone])
 
   const partnerCell = (
     <div className="relative h-full bg-paper [background-image:repeating-linear-gradient(135deg,transparent_0_14px,rgba(43,26,64,0.05)_14px_16px)] flex flex-col items-center justify-center text-center px-6">
@@ -242,7 +258,7 @@ export function ScreenHalf({
             <p className="text-graphite mt-3">두 화면 모두 처음으로 돌아가고, 점수는 저장되지 않습니다.</p>
             <div className="flex gap-3 mt-8 justify-center">
               <Button variant="secondary" onClick={() => setShowExitConfirm(false)}>계속하기</Button>
-              <Button onClick={onHome}>그만두기</Button>
+              <Button sfx="back" onClick={onHome}>그만두기</Button>
             </div>
           </Panel>
         </Overlay>
@@ -272,7 +288,7 @@ export function ScreenHalf({
 
       {/* 상단: 라운드 · 제시어 · 남은 시간 */}
       <header className="flex items-center gap-8 px-8 h-24 shrink-0 bg-white border-b-2 border-line">
-        <Button variant="secondary" size="sm" onClick={() => setShowExitConfirm(true)}>나가기</Button>
+        <Button variant="secondary" size="sm" sfx="back" onClick={() => setShowExitConfirm(true)}>나가기</Button>
         <div>
           <Label>라운드</Label>
           <div className="font-display text-3xl leading-none mt-1 tabular-nums">
