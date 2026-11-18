@@ -1,9 +1,4 @@
-/**
- * sound.ts - Arcade BGM (Menu / In-Game MP3s) & Synthesized SFX Manager
- *
- * Strictly plays ONLY on the Player 1 screen (?screen=a or ?screen=both).
- * The Ranking / 2P monitor (?screen=b) stays completely silent.
- */
+// 배경음악(메뉴·게임·AI 대결)과 효과음. 소리는 1P 화면(?screen=a, both)에서만 내고 2P·랭킹 화면은 조용히 둔다.
 
 import menuBgmUrl from '../assets/audio/Buoyant Town Loop.mp3'
 import gameBgmUrl from '../assets/audio/Bouncy Puzzle Groove.mp3'

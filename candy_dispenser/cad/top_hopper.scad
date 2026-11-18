@@ -50,7 +50,7 @@ module top_hopper() {
             translate([16, machine_depth - 18, hopper_height - 12]) cylinder(r = 4, h = 14);
             translate([machine_wid - 18, machine_depth - 18, hopper_height - 12]) cylinder(r = 4, h = 14);
 
-            // Bottom restricted throat aligning 100% with mid_housing drum inlet
+            // Bottom restricted throat aligned with the mid_housing drum inlet
             translate([10, 70.0 - hopper_throat_w / 2, -1])
                 cube([hopper_throat_l, hopper_throat_w, 2]);
         }

@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-candy_server.py - 100% English Verified Candy Dispenser Controller & API Server
-Verified Pin Sequence: [17, 27, 18, 22]
-Listens on Port 8080 for cat.io Web Game.
+candy_server.py - 사탕 디스펜서 모터 제어 + HTTP 서버 (포트 8080)
+게임이 POST /dispense {count} 를 보내면 사탕을 count 개 배출한다.
 
-Dispense cycle (verified on hardware):
-  1. Rotate 180 deg reverse (-2048 half-steps at high reliable speed) -> pocket faces dump chute
-  2. Shake 3 times (+110 / -110 steps) -> clears stuck/crinkled candies
-  3. Rotate remaining 180 deg reverse (-2048 half-steps) -> returns cleanly to top home position
+사탕 1개 배출:
+  1. 역방향 180도 (-2048 하프스텝) -> 사탕 칸이 배출구 쪽으로
+  2. 3번 흔들기 (+110 / -110) -> 걸린 사탕을 떨어뜨림
+  3. 나머지 180도 (-2048) -> 위쪽 제자리로 돌아와 다음 사탕을 받음
 """
 
 import sys
@@ -19,7 +18,7 @@ from urllib.parse import urlparse, parse_qs
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from gpiozero import OutputDevice
 
-# Verified working pin sequence on Pi 5 (Swapped middle pins: IN1, IN3, IN2, IN4)
+# 구동 핀 순서: 가운데 두 핀을 바꿔 IN1, IN3, IN2, IN4 순서로 보낸다 (28BYJ-48 코일 순서)
 PINS = [17, 27, 18, 22]
 
 HALF_STEP_SEQ = [
@@ -35,8 +34,8 @@ HALF_STEP_SEQ = [
 
 # 28BYJ-48 Gear ratio 64:1 -> 4096 half-steps per 360 degree rotation
 STEPS_HALF_REV = 2048
-STEP_DELAY = 0.0015   # Reliable max speed without step skipping
-SHAKE_DELAY = 0.0012  # Snappy shake speed
+STEP_DELAY = 0.0015   # 하프스텝당 1.5ms (이보다 빠르면 스텝이 빠질 수 있음)
+SHAKE_DELAY = 0.0012  # 흔들기는 조금 더 빠르게
 
 
 class CandyDispenser:

@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-dispenser.py - Retro Vending Machine Candy Dispenser Controller for Raspberry Pi 5.
-Controls 28BYJ-48 stepper motor via ULN2003 driver with automatic coil de-energization
-and anti-jam oscillation.
+dispenser.py - 라즈베리 파이 5용 사탕 디스펜서 모터 제어 (28BYJ-48 + ULN2003).
+움직인 뒤에는 코일 전원을 끄고, 사탕이 걸리면 앞뒤로 흔들어 뺀다.
 """
 
 import sys
@@ -16,7 +15,7 @@ logger = logging.getLogger("CandyDispenser")
 # ==============================================================================
 # PIN ASSIGNMENTS (BCM GPIO Numbers for Raspberry Pi 5)
 # ==============================================================================
-# Verified sequence on Pi 5: [17, 27, 18, 22] (Swapped middle pins for 28BYJ-48 clones)
+# 핀 순서 [17, 27, 18, 22]: 가운데 두 핀을 바꿔 28BYJ-48 코일 순서에 맞춘다
 DEFAULT_PIN_IN1 = 17  # Pi 5 Pin 11 -> ULN2003 IN1
 DEFAULT_PIN_IN2 = 27  # Pi 5 Pin 13 -> ULN2003 IN3
 DEFAULT_PIN_IN3 = 18  # Pi 5 Pin 12 -> ULN2003 IN2
@@ -41,8 +40,8 @@ HALF_STEP_SEQ = [
 # (Internal motor 64 steps * 64 gear reduction = 4096 half-steps/rev)
 STEPS_PER_REV = 4096
 STEPS_HALF_REV = 2048
-DEFAULT_STEP_DELAY = 0.0015  # 1.5ms per half-step (reliable max speed)
-SHAKE_STEP_DELAY = 0.0012    # 1.2ms per half-step for snappy shake
+DEFAULT_STEP_DELAY = 0.0015  # 하프스텝당 1.5ms (이보다 빠르면 스텝이 빠질 수 있음)
+SHAKE_STEP_DELAY = 0.0012    # 흔들기는 조금 더 빠르게
 
 class CandyDispenser:
     """Controls single candy dispensing operations with safety power-down."""
@@ -81,7 +80,7 @@ class CandyDispenser:
                     out.off()
 
     def release_coils(self):
-        """CRITICAL: Sets all coils to LOW (0, 0, 0, 0) to prevent 28BYJ-48 overheating."""
+        """코일 4개를 모두 끈다 (계속 켜 두면 모터가 뜨거워진다)."""
         self._set_pins([0, 0, 0, 0])
         if self.mock:
             logger.debug("[SIMULATION] Coils released (0, 0, 0, 0) - Motor cool.")

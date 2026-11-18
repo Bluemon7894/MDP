@@ -1,7 +1,7 @@
 import { getAiShape, CanvasPt } from '../constants/aiDrawings'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Super AI 사실화 렌더러
+// AI 차례 그림 렌더러
 //  1) src/img/ai/<영문 제시어>.png|jpg 가 있으면 그 연필화를 그대로 옮겨 그린다
 //     (apple.png 는 직접 받은 소묘, 나머지는 Wikimedia Commons 사진을 흑연 소묘로 변환한 것. 출처는 SOURCES.md)
 //  2) 없으면 직접 만든 벡터 도형에 입체 조명 + 흑연 결 텍스처를 입힌 소묘를 절차적으로 만든다
@@ -26,13 +26,15 @@ const REFERENCE_INDEX = Object.entries(REFERENCE_IMAGES).map(([path, load]) => {
   return { key, load, pencil: ext !== 'png' || PENCIL_PNG.has(key) }
 })
 
-const referenceFor = async (en: string): Promise<string | undefined> => {
+const referenceFor = async (en: string): Promise<{ url: string; lineArt: boolean } | undefined> => {
   const key = en.toLowerCase().trim().replace(/\s+/g, '_')
   const all = REFERENCE_INDEX.filter(r => r.key === key)
   const pencil = all.filter(r => r.pencil)
   const pool = pencil.length ? pencil : all
   if (!pool.length) return undefined
-  return await pool[Math.floor(Math.random() * pool.length)].load()
+  const pick = pool[Math.floor(Math.random() * pool.length)]
+  // 친구 선화(png)는 선이 가늘고 연해서 그릴 때 진하게 바꾼다
+  return { url: await pick.load(), lineArt: !pick.pencil }
 }
 
 export interface RevealStroke { pts: CanvasPt[]; width: number; alpha: number }
@@ -237,7 +239,7 @@ function renderDoodle(lines: CanvasPt[][], W: number, H: number) {
 }
 
 // 참고 연필화 → 종이색을 흰색으로 정리해 캔버스에 배치
-async function renderReference(url: string, W: number, H: number) {
+async function renderReference(url: string, W: number, H: number, lineArt = false) {
   const img = new Image()
   img.src = url
   await img.decode()
@@ -286,7 +288,11 @@ async function renderReference(url: string, W: number, H: number) {
     const ey = Math.min(y - ry0, ry0 + h - y) / (h * 0.16)
     const fade = needsFade ? 1 - Math.max(0, Math.min(1, Math.min(ex, ey))) : 0
     // 이미 정리된 소묘는 명도를 그대로 쓰고, 종이 사진만 레벨을 다시 맞춘다
-    const t = needsFade ? Math.min(1, Math.max(0, (l - lo) / Math.max(1, hi - lo)) + fade * 1.2) : l / 255
+    const t = needsFade
+      ? Math.min(1, Math.max(0, (l - lo) / Math.max(1, hi - lo)) + fade * 1.2)
+      : lineArt
+        ? Math.pow(l / 255, 4) // 연한 회색 선을 진한 연필 선으로
+        : l / 255
     const v = Math.round(255 * Math.pow(t, 1.05))
     px[i] = v
     px[i + 1] = v
@@ -360,7 +366,7 @@ export async function createAiArtwork(en: string, W: number, H: number): Promise
   const fallback = () => (shape.fills.length ? renderProcedural(shape.fills, shape.lines, W, H) : renderDoodle(shape.doodleLines, W, H))
   let art: HTMLCanvasElement
   try {
-    art = ref ? await renderReference(ref, W, H) : fallback()
+    art = ref ? await renderReference(ref.url, W, H, ref.lineArt) : fallback()
   } catch {
     art = fallback()
   }

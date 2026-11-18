@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-api_server.py - Lightweight HTTP Server for Remote Candy Dispensing.
-Allows cat.io web game or mobile browser to trigger candy dispensing via HTTP requests.
-Zero extra dependencies (uses Python standard library http.server).
+api_server.py - 사탕 배출 HTTP 서버 (dispenser.py 사용, 표준 라이브러리만 씀).
+게임이나 휴대폰 브라우저에서 /dispense 로 사탕을 배출한다.
 """
 
 import sys

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-render_views.py - Generates 4 high-definition multi-angle realistic renders of the
-assembled retro candy dispenser for visual inspection.
+render_views.py - 조립된 사탕 디스펜서를 여러 각도에서 렌더링한다 (candy_dispenser/renders/).
 """
 
 import os
@@ -9,7 +8,8 @@ import subprocess
 
 OPENSCAD = r"C:\Program Files\OpenSCAD\openscad.com"
 SCAD_FILE = r"candy_dispenser\cad\assembly_preview.scad"
-ARTIFACT_DIR = r"C:\Users\User\.gemini\antigravity\brain\33631793-d550-4917-9555-80fee120b379"
+ARTIFACT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "renders")
+os.makedirs(ARTIFACT_DIR, exist_ok=True)
 
 views = [
     # (output_filename, camera_params, explode_val)

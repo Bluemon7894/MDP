@@ -386,3 +386,130 @@ AI가 인식받을 때 쓰는 획도 같은 Quick, Draw! 데이터셋에서 고�
 | couch (`couch--2.jpg`) | [Chaise Longue Confort Online.jpg](https://commons.wikimedia.org/wiki/File:Chaise_Longue_Confort_Online.jpg) | Confortonline | CC BY-SA 4.0 |
 | crown (`crown--2.jpg`) | [King 1st Suresh's crown.jpg](https://commons.wikimedia.org/wiki/File:King_1st_Suresh%27s_crown.jpg) | SURESH2006 | CC BY-SA 4.0 |
 | crown (`crown--3.jpg`) | [Couronne portée par Mlle George dans le rôle de Marie Tudor, 1173.jpg](https://commons.wikimedia.org/wiki/File:Couronne_port%C3%A9e_par_Mlle_George_dans_le_r%C3%B4le_de_Marie_Tudor,_1173.jpg) | Anonyme, orfèvre | CC0 |
+| aircraft carrier (`aircraft_carrier.jpg`) | [US Navy 030502-N-1144C-002 The aircraft carrier USS Abraham Lincoln (CVN 72) pulls into San Diego Harbor.jpg](https://commons.wikimedia.org/wiki/File:US_Navy_030502-N-1144C-002_The_aircraft_carrier_USS_Abraham_Lincoln_(CVN_72)_pulls_into_San_Diego_Harbor.jpg) | U.S. Navy photo by Photographer’s Mate 1st Class (Ret) Chuck Cavanaugh. | Public domain |
+| airplane (`airplane.jpg`) | [Cessna 172N with registration OK-MIA.jpg](https://commons.wikimedia.org/wiki/File:Cessna_172N_with_registration_OK-MIA.jpg) | Albatros39 | CC BY 4.0 |
+| crab (`crab--2.jpg`) | [Kakubenkeigani-male-dorsal-DSC0775.jpg](https://commons.wikimedia.org/wiki/File:Kakubenkeigani-male-dorsal-DSC0775.jpg) | Ffish.asia | CC BY 4.0 |
+| crab (`crab--3.jpg`) | [Futabakakugani-DSC9568.jpg](https://commons.wikimedia.org/wiki/File:Futabakakugani-DSC9568.jpg) | Ffish.asia | CC BY 4.0 |
+| cup (`cup--2.jpg`) | [Day 021 Photo365 Contrast (96743229).jpeg](https://commons.wikimedia.org/wiki/File:Day_021_Photo365_Contrast_(96743229).jpeg) | Makia Minich | CC BY-SA 3.0 |
+| diamond (`diamond--2.jpg`) | [Natural Zambian Emerald Gemstone.jpg](https://commons.wikimedia.org/wiki/File:Natural_Zambian_Emerald_Gemstone.jpg) | Gems International | CC BY 4.0 |
+| diamond (`diamond--3.jpg`) | [Orange Diamond (GeoDIL number - 2728).jpg](https://commons.wikimedia.org/wiki/File:Orange_Diamond_(GeoDIL_number_-_2728).jpg) | Darla Sondrol | CC0 |
+| diamond (`diamond--4.jpg`) | [Oval Diamond (GeoDIL number - 2725).jpg](https://commons.wikimedia.org/wiki/File:Oval_Diamond_(GeoDIL_number_-_2725).jpg) | Darla Sondrol | CC0 |
+| dog (`dog--2.jpg`) | [Bolognese Dog.png](https://commons.wikimedia.org/wiki/File:Bolognese_Dog.png) | GJzPdTATj5D | CC BY-SA 4.0 |
+| dresser (`dresser--2.jpg`) | [Block-and-Shell Chest of Drawers LACMA M.2006.51.10a-b.jpg](https://commons.wikimedia.org/wiki/File:Block-and-Shell_Chest_of_Drawers_LACMA_M.2006.51.10a-b.jpg) | 알 수 없음 | Public domain |
+| dresser (`dresser--3.jpg`) | [A pine chest of drawers with bun feet. (c7f76543-8a3b-4a42-aead-480edaf72163).jpg](https://commons.wikimedia.org/wiki/File:A_pine_chest_of_drawers_with_bun_feet._(c7f76543-8a3b-4a42-aead-480edaf72163).jpg) | NPS Photo | Public domain |
+| dresser (`dresser--4.jpg`) | [Enfield Shaker Chest of Drawers.jpg](https://commons.wikimedia.org/wiki/File:Enfield_Shaker_Chest_of_Drawers.jpg) | Jim Gilmore, Enfield Shaker Museum | CC BY-SA 3.0 |
+| eyeglasses (`eyeglasses--2.jpg`) | [JINS-Protect-Wellington-Navy-2026 002.jpg](https://commons.wikimedia.org/wiki/File:JINS-Protect-Wellington-Navy-2026_002.jpg) | RuinDig/Yuki Uchida | CC BY 4.0 |
+| fish (`fish--2.jpg`) | [Abramis brama.png](https://commons.wikimedia.org/wiki/File:Abramis_brama.png) | Original: Lvova (Derivative work: Ellicrum) | CC BY-SA 4.0 |
+| fish (`fish--3.jpg`) | [Acipenser sturio.png](https://commons.wikimedia.org/wiki/File:Acipenser_sturio.png) | Original: Fallaner (Derivative work: Ellicrum) | CC BY-SA 4.0 |
+| fish (`fish--4.jpg`) | [Alburnus alburnus 2.png](https://commons.wikimedia.org/wiki/File:Alburnus_alburnus_2.png) | Original: Dodoman (Derivative work: Ellicrum) | CC BY-SA 4.0 |
+| flashlight (`flashlight--2.jpg`) | [GP Discovery flashlight.jpg](https://commons.wikimedia.org/wiki/File:GP_Discovery_flashlight.jpg) | Jiří Sedláček | CC BY-SA 4.0 |
+| flashlight (`flashlight--3.jpg`) | [Small flashlight (5114477671).jpg](https://commons.wikimedia.org/wiki/File:Small_flashlight_(5114477671).jpg) | contropa.com | CC BY 2.0 |
+| frog (`frog--2.jpg`) | [Pristimantis leoni.jpg](https://commons.wikimedia.org/wiki/File:Pristimantis_leoni.jpg) | University of Kansas Biodiversity Institute | CC BY 4.0 |
+| frog (`frog--3.jpg`) | [Pristimantis yonke (cropped).jpg](https://commons.wikimedia.org/wiki/File:Pristimantis_yonke_(cropped).jpg) | Unknown authorUnknown author | CC BY 4.0 |
+| frog (`frog--4.jpg`) | [Pristimantis aniptopalmatus.jpg](https://commons.wikimedia.org/wiki/File:Pristimantis_aniptopalmatus.jpg) | University of Kansas Biodiversity Institute | CC BY 4.0 |
+| hamburger (`hamburger--2.jpg`) | [2020-03-25 14 58 02 A McDonald's cheeseburger in the Franklin Farm section of Oak Hill, Fairfax County, Virginia.jpg](https://commons.wikimedia.org/wiki/File:2020-03-25_14_58_02_A_McDonald%27s_cheeseburger_in_the_Franklin_Farm_section_of_Oak_Hill,_Fairfax_County,_Virginia.jpg) | Famartin | CC BY-SA 4.0 |
+| hamburger (`hamburger--3.jpg`) | [Big Mac hamburger edit.jpg](https://commons.wikimedia.org/wiki/File:Big_Mac_hamburger_edit.jpg) | Evan-Amos | CC0 |
+| hamburger (`hamburger--4.jpg`) | [Burger Giant au Restaurant Quick à Massy le 9 avril 2017 - 1.jpg](https://commons.wikimedia.org/wiki/File:Burger_Giant_au_Restaurant_Quick_%C3%A0_Massy_le_9_avril_2017_-_1.jpg) | Lionel Allorge | CC BY-SA 3.0 |
+| hammer (`hammer--2.jpg`) | [Armorer's Hammer MET 12.230.98 001feb2014.jpg](https://commons.wikimedia.org/wiki/File:Armorer%27s_Hammer_MET_12.230.98_001feb2014.jpg) | 알 수 없음 | CC0 |
+| hammer (`hammer--3.jpg`) | [Martell de pena 3.JPG](https://commons.wikimedia.org/wiki/File:Martell_de_pena_3.JPG) | Anselm Quixal | CC BY-SA 3.0 |
+| hat (`hat--2.jpg`) | [Dessin du chapeau de Don Salluste dans "La Folie des grandeurs".png](https://commons.wikimedia.org/wiki/File:Dessin_du_chapeau_de_Don_Salluste_dans_%22La_Folie_des_grandeurs%22.png) | Groupir ! | CC BY-SA 4.0 |
+| hat (`hat--3.jpg`) | [Chistera alta TK 100149 P.jpg](https://commons.wikimedia.org/wiki/File:Chistera_alta_TK_100149_P.jpg) | Araras Sombrerería | CC BY-SA 4.0 |
+| headphones (`headphones--2.jpg`) | [HIFIMAN Edition XS.jpg](https://commons.wikimedia.org/wiki/File:HIFIMAN_Edition_XS.jpg) | Soyseak97 | CC BY-SA 4.0 |
+| hot dog (`hot_dog--2.jpg`) | [Hot dog with mustard.png](https://commons.wikimedia.org/wiki/File:Hot_dog_with_mustard.png) | Czar, original photographed by Renee Comet | Public domain |
+| hot dog (`hot_dog--3.jpg`) | [BLT Bacon Wrapped Hot Dog Shredded Romaine Lettuce Tomato Mayo Mayonnaise Buttered Bun 2 (28282479934).jpg](https://commons.wikimedia.org/wiki/File:BLT_Bacon_Wrapped_Hot_Dog_Shredded_Romaine_Lettuce_Tomato_Mayo_Mayonnaise_Buttered_Bun_2_(28282479934).jpg) | Personal Creations | CC BY 2.0 |
+| hot dog (`hot_dog--4.jpg`) | [Breakfast Hot Dog bacon wrapped scrambled eggs american cheese Sriracha chives Hawaiian bun (28868676016).jpg](https://commons.wikimedia.org/wiki/File:Breakfast_Hot_Dog_bacon_wrapped_scrambled_eggs_american_cheese_Sriracha_chives_Hawaiian_bun_(28868676016).jpg) | Personal Creations | CC BY 2.0 |
+| key (`key--2.jpg`) | [Llaves casa.jpg](https://commons.wikimedia.org/wiki/File:Llaves_casa.jpg) | Alejandro Navarro López | CC0 |
+| key (`key--3.jpg`) | [Schaltschrank Schlüssel.jpg](https://commons.wikimedia.org/wiki/File:Schaltschrank_Schl%C3%BCssel.jpg) | Harke | Public domain |
+| key (`key--4.jpg`) | [Yugoslavia Key.jpg](https://commons.wikimedia.org/wiki/File:Yugoslavia_Key.jpg) | Alexei Grach | CC0 |
+| knife (`knife--2.jpg`) | [Couteau utilisé par un soldat de la colonne Leclerc, 96.179 (2) (433.1).jpg](https://commons.wikimedia.org/wiki/File:Couteau_utilis%C3%A9_par_un_soldat_de_la_colonne_Leclerc,_96.179_(2)_(433.1).jpg) | Anonyme | CC0 |
+| knife (`knife--3.jpg`) | [Blended Knife.jpg](https://commons.wikimedia.org/wiki/File:Blended_Knife.jpg) | Manojkumar Subramani | CC BY-SA 4.0 |
+| basket (`basket.jpg`) | [கிண்ணிப் பெட்டி.jpg](https://commons.wikimedia.org/wiki/File:%E0%AE%95%E0%AE%BF%E0%AE%A3%E0%AF%8D%E0%AE%A3%E0%AE%BF%E0%AE%AA%E0%AF%8D_%E0%AE%AA%E0%AF%86%E0%AE%9F%E0%AF%8D%E0%AE%9F%E0%AE%BF.jpg) | Sivaranjani.sekar | CC BY-SA 4.0 |
+| hourglass (`hourglass--2.jpg`) | [3 Hourglasses Wellcome L0011331.jpg](https://commons.wikimedia.org/wiki/File:3_Hourglasses_Wellcome_L0011331.jpg) | 알 수 없음 | CC BY 4.0 |
+| hourglass (`hourglass--3.jpg`) | [Objectes de la Sala Horta i Marjal (26585172583).jpg](https://commons.wikimedia.org/wiki/File:Objectes_de_la_Sala_Horta_i_Marjal_(26585172583).jpg) | Museu Valencià d'Etnologia from València, España | CC BY-SA 2.0 |
+| hourglass (`hourglass--4.jpg`) | [Small sandglass.jpg](https://commons.wikimedia.org/wiki/File:Small_sandglass.jpg) | 알 수 없음 | CC BY-SA 3.0 |
+| laptop (`laptop--2.jpg`) | [Laptop image 01 (free application).jpg](https://commons.wikimedia.org/wiki/File:Laptop_image_01_(free_application).jpg) | 아사달 | CC BY 4.0 |
+| lipstick (`lipstick--2.jpg`) | [Lippenlack.png](https://commons.wikimedia.org/wiki/File:Lippenlack.png) | AnginaKup | CC BY-SA 4.0 |
+| lipstick (`lipstick--3.jpg`) | [MAC pink lipstick (1).jpg](https://commons.wikimedia.org/wiki/File:MAC_pink_lipstick_(1).jpg) | Jen | CC BY-SA 3.0 |
+| lollipop (`lollipop--2.jpg`) | [Lollipop - 1.jpg](https://commons.wikimedia.org/wiki/File:Lollipop_-_1.jpg) | Dan Bollinger | CC BY-SA 4.0 |
+| microphone (`microphone--2.jpg`) | [Nikon ME-1 Microphone.jpg](https://commons.wikimedia.org/wiki/File:Nikon_ME-1_Microphone.jpg) | Jakub T. Jankiewicz | CC BY-SA 4.0 |
+| microphone (`microphone--3.jpg`) | [Shure SM57 -- 2023 -- 0020.jpg](https://commons.wikimedia.org/wiki/File:Shure_SM57_--_2023_--_0020.jpg) | Anil Öztas | CC BY-SA 4.0 |
+| mouse (`mouse--2.jpg`) | [Mus musculus - MUSE.JPG](https://commons.wikimedia.org/wiki/File:Mus_musculus_-_MUSE.JPG) | 알 수 없음 | CC BY-SA 3.0 |
+| mouse (`mouse--3.jpg`) | [Мышь 2.jpg](https://commons.wikimedia.org/wiki/File:%D0%9C%D1%8B%D1%88%D1%8C_2.jpg) | George Shuklin (talk) | CC BY-SA 1.0 |
+| nail (`nail--2.jpg`) | [Nageltje - H48OFL - 60008524 - RCE.jpg](https://commons.wikimedia.org/wiki/File:Nageltje_-_H48OFL_-_60008524_-_RCE.jpg) | Unknown authorUnknown author | CC BY-SA 4.0 |
+| nail (`nail--3.jpg`) | [Old Nail 9058.jpg](https://commons.wikimedia.org/wiki/File:Old_Nail_9058.jpg) | User:Amada44 | CC BY-SA 4.0 |
+| necklace (`necklace--2.jpg`) | [Amuletic necklace worn to cure bronchitis, Woolwich, London. Wellcome L0035508.jpg](https://commons.wikimedia.org/wiki/File:Amuletic_necklace_worn_to_cure_bronchitis,_Woolwich,_London._Wellcome_L0035508.jpg) | 알 수 없음 | CC BY 4.0 |
+| necklace (`necklace--3.jpg`) | [BdfIMG 1167.jpg](https://commons.wikimedia.org/wiki/File:BdfIMG_1167.jpg) | Mohammed90m | CC BY-SA 4.0 |
+| octopus (`octopus--2.jpg`) | [Octopus argus.jpg](https://commons.wikimedia.org/wiki/File:Octopus_argus.jpg) | Krauss, F. | Public domain |
+| octopus (`octopus--3.jpg`) | [Octopus laqueus MM8325 160114 26081+1454700988.jpg](https://commons.wikimedia.org/wiki/File:Octopus_laqueus_MM8325_160114_26081%2B1454700988.jpg) | LifeScanner, Centre for Biodiversity Genomics | CC BY 3.0 |
+| onion (`onion--2.jpg`) | [Allium cepa 15-p.bot-lilia.alliu-014.jpg](https://commons.wikimedia.org/wiki/File:Allium_cepa_15-p.bot-lilia.alliu-014.jpg) | Ayotte, Gilles, 1948- | CC BY-SA 4.0 |
+| onion (`onion--3.jpg`) | [Allium cepa 15-p.bot-lilia.alliu-015.jpg](https://commons.wikimedia.org/wiki/File:Allium_cepa_15-p.bot-lilia.alliu-015.jpg) | Ayotte, Gilles, 1948- | CC BY-SA 4.0 |
+| onion (`onion--4.jpg`) | [Allium cepa 15-p.bot-lilia.alliu-016.jpg](https://commons.wikimedia.org/wiki/File:Allium_cepa_15-p.bot-lilia.alliu-016.jpg) | Ayotte, Gilles, 1948- | CC BY-SA 4.0 |
+| pants (`pants--2.jpg`) | [Spodnie wz. 2010.jpg](https://commons.wikimedia.org/wiki/File:Spodnie_wz._2010.jpg) | Ministerstwo Obrony Narodowej | CC BY-SA 4.0 |
+| parrot (`parrot--2.jpg`) | [Parakeet.jpg](https://commons.wikimedia.org/wiki/File:Parakeet.jpg) | Nithisha Vasudevan | CC BY 4.0 |
+| passport (`passport--2.jpg`) | [Armenian Passport 2026 (Sample).jpg](https://commons.wikimedia.org/wiki/File:Armenian_Passport_2026_(Sample).jpg) | Government of the Republic of Armenia | Public domain |
+| pear (`pear--2.jpg`) | [Pear DS.jpg](https://commons.wikimedia.org/wiki/File:Pear_DS.jpg) | Augustus Binu : flickr | CC BY-SA 3.0 |
+| pineapple (`pineapple--2.jpg`) | [Ananas~May 2008-1.jpg](https://commons.wikimedia.org/wiki/File:Ananas~May_2008-1.jpg) | Alvesgaspar | CC BY-SA 3.0 |
+| pineapple (`pineapple--3.jpg`) | [Ananas (14237107280).jpg](https://commons.wikimedia.org/wiki/File:Ananas_(14237107280).jpg) | Tim Reckmann from Hamm, Deutschland | CC BY 2.0 |
+| pineapple (`pineapple--4.jpg`) | [Ananas (1).jpg](https://commons.wikimedia.org/wiki/File:Ananas_(1).jpg) | Alina Zienowicz Ala z | Public domain |
+| radio (`radio--2.jpg`) | [Kipo K8-7022AC radio receiver.png](https://commons.wikimedia.org/wiki/File:Kipo_K8-7022AC_radio_receiver.png) | User:JrawX | CC0 |
+| saxophone (`saxophone--2.jpg`) | [Saxophone with Notes.jpg](https://commons.wikimedia.org/wiki/File:Saxophone_with_Notes.jpg) | pd4u | CC0 |
+| scorpion (`scorpion--2.jpg`) | [Centruroides suffusus 1.jpg](https://commons.wikimedia.org/wiki/File:Centruroides_suffusus_1.jpg) | Tomascastelazo | CC BY-SA 3.0 |
+| scorpion (`scorpion--3.jpg`) | [Euscorpius gulhanimae.jpg](https://commons.wikimedia.org/wiki/File:Euscorpius_gulhanimae.jpg) | Fatikben | CC BY-SA 4.0 |
+| scorpion (`scorpion--4.jpg`) | [Euscorpius spec. (Euscorpiidae) (Small Wood-Scorpion unknown), Molazzana (comuni), Italy - 2.jpg](https://commons.wikimedia.org/wiki/File:Euscorpius_spec._(Euscorpiidae)_(Small_Wood-Scorpion_unknown),_Molazzana_(comuni),_Italy_-_2.jpg) | This image is created by user B. Schoenmakers at Observation.org, a global biodiversity recording project. | CC BY 3.0 |
+| shorts (`shorts--2.jpg`) | [Pantaloneta.jpg](https://commons.wikimedia.org/wiki/File:Pantaloneta.jpg) | Oscarin200 | CC BY-SA 4.0 |
+| shorts (`shorts--3.jpg`) | [Polo RalpH Lauren shorts.jpg](https://commons.wikimedia.org/wiki/File:Polo_RalpH_Lauren_shorts.jpg) | Menswear Market | CC BY 2.0 |
+| teapot (`teapot--2.jpg`) | [Theepot met op de buitenzijde zes landschappen methtee drinkende personages binnen een rijk Moors floraal decor met aan de rand van de pot een fries met Arabisch schrift - anoniem - Musea Brugge - 4.jpg](https://commons.wikimedia.org/wiki/File:Theepot_met_op_de_buitenzijde_zes_landschappen_methtee_drinkende_personages_binnen_een_rijk_Moors_floraal_decor_met_aan_de_rand_van_de_pot_een_fries_met_Arabisch_schrift_-_anoniem_-_Musea_Brugge_-_4.jpg) | Dominique Provost | Public domain |
+| teapot (`teapot--3.jpg`) | [Theepot met voorstelling van galante taferelen, asset Z2fboMQaWJckp6baBf20JfwK.jpg](https://commons.wikimedia.org/wiki/File:Theepot_met_voorstelling_van_galante_taferelen,_asset_Z2fboMQaWJckp6baBf20JfwK.jpg) | Unknown authorUnknown author | CC0 |
+| teapot (`teapot--4.jpg`) | [Achthoekige theepot met los deksel, asset C2KGb5WWFHkcdQmIAA2Pg0h8.jpg](https://commons.wikimedia.org/wiki/File:Achthoekige_theepot_met_los_deksel,_asset_C2KGb5WWFHkcdQmIAA2Pg0h8.jpg) | Unknown authorUnknown author | CC0 |
+| toaster (`toaster--2.jpg`) | [16 TOSTADORA.jpg](https://commons.wikimedia.org/wiki/File:16_TOSTADORA.jpg) | Museuvalenciaetnologia | CC BY-SA 4.0 |
+| violin (`violin--2.jpg`) | [Amati Kurtz Violin MET cropped.jpg](https://commons.wikimedia.org/wiki/File:Amati_Kurtz_Violin_MET_cropped.jpg) | Andrea Amati | CC0 |
+| bicycle (`bicycle.jpg`) | [KEM Full bike.jpg](https://commons.wikimedia.org/wiki/File:KEM_Full_bike.jpg) | NICH CYCLING | CC BY-SA 4.0 |
+| bicycle (`bicycle--2.jpg`) | [L4 2024 Black Side.jpg](https://commons.wikimedia.org/wiki/File:L4_2024_Black_Side.jpg) | NICH CYCLING | CC BY-SA 4.0 |
+| bird (`bird.jpg`) | [Masillaraptor restoration.jpeg](https://commons.wikimedia.org/wiki/File:Masillaraptor_restoration.jpeg) | El fosilmaníaco | CC BY-SA 4.0 |
+| bread (`bread--2.jpg`) | [Pain carre blanc.jpg](https://commons.wikimedia.org/wiki/File:Pain_carre_blanc.jpg) | Jeangagnon | CC BY-SA 4.0 |
+| bus (`bus.jpg`) | [At At Santa Cruz de Tenerife 2023 151.jpg](https://commons.wikimedia.org/wiki/File:At_At_Santa_Cruz_de_Tenerife_2023_151.jpg) | Photograph by Mike Peel (www.mikepeel.net). | CC BY-SA 4.0 |
+| pencil (`pencil--2.jpg`) | [Conte pencil.jpg](https://commons.wikimedia.org/wiki/File:Conte_pencil.jpg) | Mijnnaam (Baselmans 16:21, 15 July 2007 (UTC)) | Public domain |
+| pillow (`pillow--2.jpg`) | [Farwayart-carpet-pillow5.jpg](https://commons.wikimedia.org/wiki/File:Farwayart-carpet-pillow5.jpg) | Sr3207 | CC BY-SA 4.0 |
+| popsicle (`popsicle--2.jpg`) | [Popsicle blue.png](https://commons.wikimedia.org/wiki/File:Popsicle_blue.png) | Kurtkaiser | CC0 |
+| popsicle (`popsicle--3.jpg`) | [Popsicle.png](https://commons.wikimedia.org/wiki/File:Popsicle.png) | Kurtkaiser | CC0 |
+| sandwich (`sandwich--2.jpg`) | [Martino sandwich.jpg](https://commons.wikimedia.org/wiki/File:Martino_sandwich.jpg) | DomainHertogh | CC0 |
+| sandwich (`sandwich--3.jpg`) | [Philly Cheesesteak hot dog steak cheese peppers onions (28282474934).jpg](https://commons.wikimedia.org/wiki/File:Philly_Cheesesteak_hot_dog_steak_cheese_peppers_onions_(28282474934).jpg) | Personal Creations | CC BY 2.0 |
+| screwdriver (`screwdriver--2.jpg`) | [Big flat screwdriver.jpg](https://commons.wikimedia.org/wiki/File:Big_flat_screwdriver.jpg) | Jiří Sedláček | CC BY-SA 4.0 |
+| screwdriver (`screwdriver--3.jpg`) | [Magnetschraubendreher IMGP1940.jpg](https://commons.wikimedia.org/wiki/File:Magnetschraubendreher_IMGP1940.jpg) | Smial | CC BY-SA 2.0 de |
+| screwdriver (`screwdriver--4.jpg`) | [Screw Driver display.jpg](https://commons.wikimedia.org/wiki/File:Screw_Driver_display.jpg) | Fcb981 at English Wikipedia | CC BY 2.5 |
+| shoe (`shoe--2.jpg`) | [Handwork Footwear.jpg](https://commons.wikimedia.org/wiki/File:Handwork_Footwear.jpg) | Vachan R | CC BY-SA 4.0 |
+| skateboard (`skateboard--2.jpg`) | [صورة السكوتر الذكي.jpg](https://commons.wikimedia.org/wiki/File:%D8%B5%D9%88%D8%B1%D8%A9_%D8%A7%D9%84%D8%B3%D9%83%D9%88%D8%AA%D8%B1_%D8%A7%D9%84%D8%B0%D9%83%D9%8A.jpg) | حامد أحمد | CC BY 4.0 |
+| sock (`sock--2.jpg`) | [PdfZarbool.jpg](https://commons.wikimedia.org/wiki/File:PdfZarbool.jpg) | Mohammed90m | CC BY-SA 4.0 |
+| spider (`spider--2.jpg`) | [Agalenatea redii (Araneidae), Molenhoek, the Netherlands - 2.jpg](https://commons.wikimedia.org/wiki/File:Agalenatea_redii_(Araneidae),_Molenhoek,_the_Netherlands_-_2.jpg) | This image is created by user B. Schoenmakers at Waarneming.nl, a source of nature observations in the Netherlands. | CC BY 3.0 |
+| spider (`spider--3.jpg`) | [Agalenatea redii (Araneidae), Molenhoek, the Netherlands.jpg](https://commons.wikimedia.org/wiki/File:Agalenatea_redii_(Araneidae),_Molenhoek,_the_Netherlands.jpg) | This image is created by user B. Schoenmakers at Waarneming.nl, a source of nature observations in the Netherlands. | CC BY 3.0 |
+| spider (`spider--4.jpg`) | [Alopecosa barbipes.jpg](https://commons.wikimedia.org/wiki/File:Alopecosa_barbipes.jpg) | This image is created by user Frank van de Putte at Waarneming.nl, a source of nature observations in the Netherlands. | CC BY 3.0 |
+| table (`table--2.jpg`) | [Dinner table side pine wood large table 2.png](https://commons.wikimedia.org/wiki/File:Dinner_table_side_pine_wood_large_table_2.png) | Kurtkaiser | CC0 |
+| table (`table--3.jpg`) | [Dinner table side pine wood large table front.png](https://commons.wikimedia.org/wiki/File:Dinner_table_side_pine_wood_large_table_front.png) | Kurtkaiser | CC0 |
+| table (`table--4.jpg`) | [Dinner table side pine wood large table side.png](https://commons.wikimedia.org/wiki/File:Dinner_table_side_pine_wood_large_table_side.png) | Kurtkaiser | CC0 |
+| television (`television--2.jpg`) | [Front-Side+Stand.png](https://commons.wikimedia.org/wiki/File:Front-Side%2BStand.png) | Royeligio | CC BY-SA 4.0 |
+| television (`television--3.jpg`) | [4 TELEVISION.jpg](https://commons.wikimedia.org/wiki/File:4_TELEVISION.jpg) | Museuvalenciaetnologia | CC BY-SA 4.0 |
+| toothbrush (`toothbrush--2.jpg`) | [A Toothbrush.JPG](https://commons.wikimedia.org/wiki/File:A_Toothbrush.JPG) | Dwight Burdette | CC BY 3.0 |
+| umbrella (`umbrella--2.jpg`) | [Chargebrella.jpg](https://commons.wikimedia.org/wiki/File:Chargebrella.jpg) | Ing. Daniel Šlosár | CC BY-SA 4.0 |
+| vase (`vase--2.jpg`) | [Blaue Keramikvase 2021.jpg](https://commons.wikimedia.org/wiki/File:Blaue_Keramikvase_2021.jpg) | VSchagow | CC BY-SA 4.0 |
+| butterfly (`butterfly.jpg`) | [Imago (PSF).png](https://commons.wikimedia.org/wiki/File:Imago_(PSF).png) | Pearson Scott Foresman | Public domain |
+| computer (`computer.jpg`) | [Falcon Northwest Mach V desktop PC in Jade paintwork.png](https://commons.wikimedia.org/wiki/File:Falcon_Northwest_Mach_V_desktop_PC_in_Jade_paintwork.png) | Falcon Northwest | CC BY-SA 4.0 |
+| computer (`computer--2.jpg`) | [Falcon Northwest Mach V full tower desktop PC.png](https://commons.wikimedia.org/wiki/File:Falcon_Northwest_Mach_V_full_tower_desktop_PC.png) | Falcon Northwest | CC BY-SA 4.0 |
+| computer (`computer--3.jpg`) | [Falcon Northwest Talon.png](https://commons.wikimedia.org/wiki/File:Falcon_Northwest_Talon.png) | Falcon Northwest | CC BY-SA 4.0 |
+| cookie (`cookie--2.jpg`) | [McVities Mini Cheddars (Original and BBQ) (transparent BG).png](https://commons.wikimedia.org/wiki/File:McVities_Mini_Cheddars_(Original_and_BBQ)_(transparent_BG).png) | Ubcule | CC BY-SA 3.0 |
+| cookie (`cookie--3.jpg`) | [Leibniz Pick-Up 2.jpg](https://commons.wikimedia.org/wiki/File:Leibniz_Pick-Up_2.jpg) | SKopp | CC BY-SA 4.0 |
+| dishwasher (`dishwasher.jpg`) | [Lave vaisselle Radiola 2019.jpg](https://commons.wikimedia.org/wiki/File:Lave_vaisselle_Radiola_2019.jpg) | Malherbe Anne | CC BY-SA 4.0 |
+| donut (`donut--2.jpg`) | [Dough-Donut-Cinnamon-Sugar.jpg](https://commons.wikimedia.org/wiki/File:Dough-Donut-Cinnamon-Sugar.jpg) | Evan-Amos | Public domain |
+| drill (`drill--2.jpg`) | [Twist Drill Bit (6954963717).jpg](https://commons.wikimedia.org/wiki/File:Twist_Drill_Bit_(6954963717).jpg) | andersen_mrjh | CC BY-SA 2.0 |
+| drill (`drill--3.jpg`) | [Punte coniche.jpg](https://commons.wikimedia.org/wiki/File:Punte_coniche.jpg) | Ricce | Public domain |
+| feather (`feather--2.jpg`) | [Troma - Flickr - TheAlieness GiselaGiardino²³.jpg](https://commons.wikimedia.org/wiki/File:Troma_-_Flickr_-_TheAlieness_GiselaGiardino%C2%B2%C2%B3.jpg) | Gisela Giardino from Buenos Aires, Argentina | CC BY-SA 2.0 |
+| fire hydrant (`fire_hydrant.jpg`) | [13-05-24-wien-RalfR-013.jpg](https://commons.wikimedia.org/wiki/File:13-05-24-wien-RalfR-013.jpg) | Ralf Roletschek | CC BY 3.0 |
+| firetruck (`firetruck.jpg`) | [Altes Feuerwehrfahrzeug.jpg](https://commons.wikimedia.org/wiki/File:Altes_Feuerwehrfahrzeug.jpg) | Elmar Ersch | CC BY-SA 3.0 |
+| flamingo (`flamingo.jpg`) | [PSM V32 D699 The flamingo.jpg](https://commons.wikimedia.org/wiki/File:PSM_V32_D699_The_flamingo.jpg) | Unknown authorUnknown author | Public domain |
+| flower (`flower--2.jpg`) | [Alcea rosea 2025 G1.jpg](https://commons.wikimedia.org/wiki/File:Alcea_rosea_2025_G1.jpg) | George Chernilevsky | CC BY 4.0 |
+| flower (`flower--3.jpg`) | [Chrysanthemum FoV 18mm.png](https://commons.wikimedia.org/wiki/File:Chrysanthemum_FoV_18mm.png) | Pavel.Somov | CC BY 4.0 |
+| guitar (`guitar--2.jpg`) | [ST vintage.jpg](https://commons.wikimedia.org/wiki/File:ST_vintage.jpg) | CocoBass | CC BY-SA 4.0 |
+| helicopter (`helicopter.jpg`) | [20170826 PZL Świdnik SW-4 Puszczyk Radom Air Show 7090 DxO.jpg](https://commons.wikimedia.org/wiki/File:20170826_PZL_%C5%9Awidnik_SW-4_Puszczyk_Radom_Air_Show_7090_DxO.jpg) | Jakub Hałun | CC BY-SA 4.0 |
+| helicopter (`helicopter--2.jpg`) | [Sikorsky VH-3D 159357 HMX-1 FDK MD2.jpg](https://commons.wikimedia.org/wiki/File:Sikorsky_VH-3D_159357_HMX-1_FDK_MD2.jpg) | Acroterion | CC BY-SA 4.0 |
+| helicopter (`helicopter--3.jpg`) | [Bell 407 HB-XQY.jpg](https://commons.wikimedia.org/wiki/File:Bell_407_HB-XQY.jpg) | Chme82 | CC BY-SA 4.0 |
+| leaf (`leaf--2.jpg`) | [Folhas2.JPG](https://commons.wikimedia.org/wiki/File:Folhas2.JPG) | Catarina Alves | Public domain |
+| oven (`oven.jpg`) | [Pizzaugn Pizza oven Mora ovens.jpg](https://commons.wikimedia.org/wiki/File:Pizzaugn_Pizza_oven_Mora_ovens.jpg) | Tun06200 | CC BY-SA 4.0 |

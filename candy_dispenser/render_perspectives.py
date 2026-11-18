@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-render_perspectives.py - Generates ultra-clean 3D perspective and cutaway renderings
-of the newly updated retro candy dispenser.
+render_perspectives.py - 디스펜서 투시도와 절개도를 렌더링한다 (candy_dispenser/renders/).
 """
 
 import os
@@ -9,7 +8,8 @@ import subprocess
 
 OPENSCAD = r"C:\Program Files\OpenSCAD\openscad.com"
 SCAD_FILE = r"candy_dispenser\cad\cutaway_view.scad"
-ARTIFACT_DIR = r"C:\Users\User\.gemini\antigravity\brain\33631793-d550-4917-9555-80fee120b379"
+ARTIFACT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "renders")
+os.makedirs(ARTIFACT_DIR, exist_ok=True)
 
 views = [
     # (output_filename, cut_mode, camera_params, description)

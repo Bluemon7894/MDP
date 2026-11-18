@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-render_internal_views.py - Generates ultra-detailed internal section renderings
-showing exact mechanical and electrical placement inside the dispenser.
+render_internal_views.py - 디스펜서 내부 단면도(기구·전자 부품 배치)를 렌더링한다 (candy_dispenser/renders/).
 """
 
 import os
@@ -9,7 +8,8 @@ import subprocess
 
 OPENSCAD = r"C:\Program Files\OpenSCAD\openscad.com"
 SCAD_FILE = r"candy_dispenser\cad\internal_detailed_views.scad"
-ARTIFACT_DIR = r"C:\Users\User\.gemini\antigravity\brain\33631793-d550-4917-9555-80fee120b379"
+ARTIFACT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "renders")
+os.makedirs(ARTIFACT_DIR, exist_ok=True)
 
 views = [
     # (filename, view_mode, camera_params)

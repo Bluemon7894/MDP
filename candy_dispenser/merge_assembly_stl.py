@@ -148,7 +148,7 @@ def main():
 
     # Write unified binary STL
     print(f"\n[OUTPUT] Writing unified binary STL ({len(all_triangles)} total triangles)...")
-    header_str = b"Antigravity Unified Complete Retro Candy Dispenser Assembly STL\0"
+    header_str = b"cat.io candy dispenser assembly\0"
     header_bytes = header_str.ljust(80, b"\0")
 
     with open(OUTPUT_STL, "wb") as f:

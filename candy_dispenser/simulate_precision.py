@@ -193,7 +193,7 @@ def main():
     print("  * MicroSD Finger Slot : Cutout 16.0 x 14.0 mm on chassis floor                     -> PASSED (Push-pull access)")
 
     print("\n" + "=" * 75)
-    print("  SIMULATION VERIFICATION RESULT: 100% COMPLETE & CERTIFIED FOR 3D PRINTING")
+    print("  SIMULATION RESULT: all checks passed")
     print("=" * 75)
 
 if __name__ == "__main__":

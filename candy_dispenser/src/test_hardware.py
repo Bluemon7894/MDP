@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-test_hardware.py - Interactive Hardware Diagnostic & Calibration Tool for Pi 5.
-Verifies ULN2003 wiring sequence, LED indicators, rotation angles, and coil shutoff.
+test_hardware.py - 디스펜서 하드웨어 점검 메뉴.
+ULN2003 배선 순서, LED, 회전 각도, 코일 끄기를 하나씩 확인한다.
 """
 
 import sys

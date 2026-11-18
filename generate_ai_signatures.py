@@ -96,7 +96,7 @@ def main():
             "sample_count": len(samples)
         }
         
-        # Save highest quality sample to src/img/ai/<en_label>.png for Super AI drawing!
+        # 첫 번째 샘플을 src/img/ai/<en_label>.png 로 저장 (AI 차례 그림의 대체 선화로 쓴다)
         best_norm256 = samples[0]["norm256"]
         # Invert so black stroke on transparent or white background
         clean_canvas = 255 - best_norm256 # 255 = white, 0 = black stroke

@@ -1,8 +1,8 @@
 // ==============================================================================
-// CANDY DISPENSER - TOP LID (100% FLAT-BED PRINTABLE REFILL COVER)
+// CANDY DISPENSER - TOP LID (refill cover, prints flat)
 // ==============================================================================
 // Sits perfectly flush into top_hopper's built-in 4.0mm stepped rim recess.
-// Bottom is 100% FLAT on print bed -> ZERO SUPPORTS, ZERO FAILURES!
+// Flat bottom on the print bed, so no supports are needed.
 // Prints in ~1 hour with flawless surface finish.
 // Features retro stepped crown bevel and integrated ergonomic grip handle.
 // ==============================================================================
@@ -15,7 +15,7 @@ module top_lid() {
     lid_t = 3.8; // Plate thickness (fits flush inside 4.0mm hopper recess)
 
     union() {
-        // 1. 100% Flat Bottom Base Plate (Perfect bed adhesion)
+        // 1. Flat bottom base plate
         hull() {
             translate([4, 4, 0]) cylinder(r = 4, h = lid_t);
             translate([lid_w - 4, 4, 0]) cylinder(r = 4, h = lid_t);

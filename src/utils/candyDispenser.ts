@@ -1,7 +1,4 @@
-/**
- * candyDispenser.ts - Client integration for the Retro Candy Dispenser.
- * Triggers physical candy dispensing over HTTP to the Raspberry Pi 5 dispenser service.
- */
+// 게임이 끝나면 라즈베리 파이의 사탕 서버(candy_server.py, 포트 8080)에 배출을 요청한다.
 
 const getDispenserBaseUrl = (): string => {
   if (typeof window === 'undefined') return 'http://localhost:8080'

@@ -1,7 +1,7 @@
 // ==============================================================================
 // CANDY DISPENSER - MID HOUSING (DRUM CHAMBER, DIRECTIONAL INLET & M4 BOLTS)
 // ==============================================================================
-// Features 28mm directional inlet matching hopper throat for 100% candy alignment.
+// Features 28mm directional inlet matching hopper throat so candies enter the drum in the right orientation.
 // Complete food/electronics physical isolation wall.
 // 20-Series M4 clearance holes for corner columns & service panel.
 //
